@@ -17,6 +17,8 @@ class DataKLHK extends Model
 
     protected $fillable = [
         'tanggal',
+        'longitude',
+        'latitude',
         'SO2',
         'CO',
         'O3',

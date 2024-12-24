@@ -16,7 +16,7 @@
         <div class="row">
             <div class="col-md-7 mx-auto">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header-form">
                         <h5 class="kop-surat" style="font-weight: bold">FORM TAMBAH DATA UJI KUALITAS AIR INTERNAL</h5>
                     </div>
                     <div class="card-body">
@@ -48,8 +48,14 @@
                             <div class="row">
                                 <div class="col-md-8 pr-1">
                                     <div class="form-group">
-                                        <label for="titik_koordinat" class="form">Titik Koordinat</label>
-                                        <input type="text" name="titik_koordinat" id="titik_koordinat" class="form-control" placeholder="Koordinat" required>
+                                        <label for="longitude" class="form">Titik Koordinat X</label>
+                                        <input type="text" name="longitude" id="longitude" class="form-control" placeholder="Koordinat" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-8 pr-1">
+                                    <div class="form-group">
+                                        <label for="latitude" class="form">Titik Koordinat Y</label>
+                                        <input type="text" name="latitude" id="latitude" class="form-control" placeholder="Koordinat" required>
                                     </div>
                                 </div>
                             </div>
@@ -111,6 +117,20 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="row">
+                                <div class="form-group" style="margin-left: 15px; margin-top: 35px; display: flex; align-items: center;">
+                                    <input type="hidden" name="isMarker" value="0">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" name="isMarker" value="1" style="display: none;">
+                                        <div class="toggle-switch-background">
+                                            <div class="toggle-switch-handle"></div>
+                                        </div>
+                                    </label>
+                                    <p style="margin: 5px 15px;">Tampilkan data ke peta</p>
+                                </div>
+                            </div>
+
+
                             {{-- <div class="row">
                                 <div class="col-md-6 pr-1">
                                     <div class="form-group">

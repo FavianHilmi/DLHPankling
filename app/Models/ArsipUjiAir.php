@@ -16,19 +16,21 @@ class ArsipUjiAir extends Model
     protected $table = 'arsip_data_air_internals';
 
     protected $fillable = [
-            'bulan',
-            'tahun',
-            'nama_lokasi',
-            'titik_koordinat',
-            'pH',
-            'DO',
-            'BOD',
-            'COD',
-            'TSS',
-            'total_coli',
-            'fecal_coli',
-            'status',
-            'user_id'
+        'bulan',
+        'tahun',
+        'nama_lokasi',
+        'longitude',
+        'latitude',
+        'pH',
+        'DO',
+        'BOD',
+        'COD',
+        'TSS',
+        'total_coli',
+        'fecal_coli',
+        'status',
+        'isMarker',
+        'user_id'
 
     ];
     public $timestamps = true;

@@ -14,7 +14,8 @@ class UjiAirEksternal extends Model
         'tanggal',
         'nama_lokasi',
         'wilayah_lokasi',
-        'titik_koordinat',
+        'longitude',
+        'latitude',
         'temperature',
         'TDS',
         'TSS',
@@ -50,7 +51,8 @@ class UjiAirEksternal extends Model
         'phenol',
         'fecal_coli',
         'total_coli',
-        'waste'
+        'waste',
+        'isMarker'
     ];
     public function user()
     {

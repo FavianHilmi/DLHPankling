@@ -15,7 +15,9 @@ class DataKLHKRequest extends FormRequest
     {
         return [
             'tanggal' => 'required|date',
-            'SO2' => 'required|numeric',
+            'longitude' => 'required|string',
+            'latitude' => 'required|string',
+            'SO2'  => 'required|numeric',
             'CO' => 'required|numeric',
             'O3' => 'required|numeric',
             'NO2' => 'required|numeric',

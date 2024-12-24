@@ -20,7 +20,8 @@ class UjiAirInternalRequest extends FormRequest
             'tanggal' => 'required|date',
             'nama_lokasi' => 'required|string',
             'wilayah_lokasi' => 'required|string',
-            'titik_koordinat' => 'required|string',
+            'longitude' => 'required|string',
+            'latitude' => 'required|string',
             'pH' => 'required|numeric',
             'DO' => 'required|numeric',
             'BOD' => 'required|numeric',
@@ -29,7 +30,8 @@ class UjiAirInternalRequest extends FormRequest
             'nitrat' => 'required|numeric',
             'fosfat' => 'required|numeric',
             'fecal_coli' => 'required|numeric',
-            'kelas' => 'required|numeric'
+            'kelas' => 'required|numeric',
+            'isMarker' => 'required|string'
 
 
         ];

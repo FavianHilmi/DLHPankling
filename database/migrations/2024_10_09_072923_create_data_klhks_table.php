@@ -15,6 +15,9 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->date('tanggal');
+            $table->string('lokasi')->nullable();
+            $table->string('longitude')->nullable();
+            $table->string('latitude')->nullable();
             $table->float('SO2');
             $table->float('CO');
             $table->float('O3');

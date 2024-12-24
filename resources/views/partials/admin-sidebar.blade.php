@@ -31,7 +31,7 @@
                 </a>
                 <ul id="udaraSubmenu" style="display: none; padding-left: 20px;">
                     <li><a class="submenu-sidebar" href="/data_spkua" :active="request()->is('dataSpkuas')"><p>Data SPKUA</p></a></li>
-                    <li><a class="submenu-sidebar" href="/data_klhk" :active="request()->is('dataKlhks')"><p>Data KLHK</p></a></li>
+                    <li><a class="submenu-sidebar" href="/data_klhk" :active="request()->is('dataKlhks')"><p>Data SPKUA KLHK</p></a></li>
                     <li><a class="submenu-sidebar" href="/data_passive" :active="request()->is('dataPassives')"><p>Data Passive Sample</p></a></li>
                     <li><a class="submenu-sidebar" href="/data_partikulat" :active="request()->is('dataPartikulats')"><p>Data Partikulat Mobile</p></a></li>
                 </ul>
@@ -55,7 +55,7 @@
                 </a>
             </li>
             <li>
-                <a href="/berita_acara">
+                <a href="/data_kawasan">
                     <i class="now-ui-icons text_caps-small"></i>
                     <p>Kategori Kawasan</p>
                 </a>

@@ -18,10 +18,11 @@ class DataBeritaAcaraRequest extends FormRequest
             'tanggal' => 'required|date',
             'deskripsi' => 'required|string',
             'nama_kolom_penguji' => 'required|string',
-            'nama_penguji' => 'required|string',
-            'instansi' => 'required|string',
-            'berita_id' => 'nullable|exists:beritas,id',
-            'ttd' => 'nullable|string',
+            'penguji.*.nama_penguji' => 'required|string',
+            'penguji.*.instansi' => 'required|string',
+            'penguji.*.ttd' => 'nullable|file|mimes:jpeg,png,jpg|max:2048',
+
         ];
     }
+
 }

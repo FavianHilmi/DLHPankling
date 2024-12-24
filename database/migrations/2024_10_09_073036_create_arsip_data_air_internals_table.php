@@ -16,7 +16,8 @@ return new class extends Migration {
             $table->string('bulan');
             $table->string('tahun');
             $table->string('nama_lokasi');
-            $table->string('titik_koordinat')->nullable();
+            $table->string('longitude')->nullable();
+            $table->string('latitude')->nullable();
             $table->float('BOD');
             $table->float('COD');
             $table->float('TSS');
@@ -24,6 +25,7 @@ return new class extends Migration {
             $table->float('pH');
             $table->float('total_coli');
             $table->float('fecal_coli');
+            $table->string('isMarker')->default('0');
             $table->enum('status', ['Sedang Diajukan', 'Terverifikasi', 'Perlu Revisi'])->default('Sedang Diajukan');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
         });

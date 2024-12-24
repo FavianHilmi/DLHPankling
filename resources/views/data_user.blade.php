@@ -13,7 +13,7 @@
                             <span class="navbar-toggler-bar bar3"></span>
                         </button>
                     </div>
-                    <a class="navbar-brand" href="#pablo">Data Kualitas Udara</a>
+                    <a class="navbar-brand" href="#pablo">Data Pengguna</a>
                 </div>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navigation"
                     aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
@@ -22,46 +22,27 @@
                     <span class="navbar-toggler-bar navbar-kebab"></span>
                 </button>
                 <div class="collapse navbar-collapse justify-content-end" id="navigation">
-                    <form>
-                        <div class="input-group no-border">
-                            <input type="text" value="" class="form-control" placeholder="Search...">
-                            <div class="input-group-append">
-                                <div class="input-group-text">
-                                    <i class="now-ui-icons ui-1_zoom-bold"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
                     <ul class="navbar-nav">
-                        <li class="nav-item">
-                            <a class="nav-link" href="#pablo">
-                                <i class="now-ui-icons media-2_sound-wave"></i>
-                                <p>
-                                    <span class="d-lg-none d-md-block">Stats</span>
-                                </p>
-                            </a>
-                        </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown"
                                 aria-haspopup="true" aria-expanded="false">
-                                <i class="now-ui-icons location_world"></i>
+                                {{-- <i class="now-ui-icons location_world"></i> --}}
+                                <i class="now-ui-icons users_single-02"></i>
                                 <p>
                                     <span class="d-lg-none d-md-block">Some Actions</span>
                                 </p>
                             </a>
                             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
-                                <a class="dropdown-item" href="#">Action</a>
-                                <a class="dropdown-item" href="#">Another action</a>
-                                <a class="dropdown-item" href="#">Something else here</a>
+                                <a class="dropdown-item" href="#">Profile</a>
+
+                                <!-- Form logout -->
+                                <form method="POST" action="{{ route('logout') }}" style="display: inline;">
+                                    @csrf
+                                    <input type="submit" class="dropdown-item" value="{{ __('Log Out') }}">
+                                </form>
+
                             </div>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#pablo">
-                                <i class="now-ui-icons users_single-02"></i>
-                                <p>
-                                    <span class="d-lg-none d-md-block">Account</span>
-                                </p>
-                            </a>
+
                         </li>
                     </ul>
                 </div>
@@ -75,10 +56,9 @@
                 <div class="col-md-12">
                     <div class="card">
                         <div class="card-header">
-                            <h4 class="card-title">Data KLHK</h4>
-                            <button class="button-add" onclick="window.location.href='/form_data_klhk';">
-                                <i class="now-ui-icons ui-1_simple-add" style="color: white; font-weight:bold;"></i>
-                                <span class="lable">Tambah Data</span>
+                            <h4 class="card-title">Data Pengguna</h4>
+                            <button class="button-add" onclick="window.location.href='/register';">
+                                <i class="bi bi-file-earmark-plus"></i>
                             </button>
                         </div>
                         <div class="card-body">
@@ -89,107 +69,62 @@
                                             No.
                                         </th>
                                         <th class="text-center">
-                                            Tanggal
+                                            Username
                                         </th>
                                         <th class="text-center">
-                                            SO2
+                                            Email
                                         </th>
                                         <th class="text-center">
-                                            CO
+                                            Password
                                         </th>
                                         <th class="text-center">
-                                            O3
+                                            Role
                                         </th>
-                                        <th class="text-center">
-                                            NO2
-                                        </th>
-                                        <th class="text-center">
-                                            HC
-                                        </th>
-                                        <th class="text-center">
-                                            PM10
-                                        </th>
-                                        <th class="text-center">
-                                            PM2,5
-                                        </th>
-                                        <th class="text-center">
-                                            Status
-                                        </th>
-                                        {{-- @if (Auth::user()->role === 'admin') --}}
-                                        <th class="text-center">
-                                            Kontributor
-                                        </th>
-                                        {{-- @endif --}}
                                         <th class="text-center">
                                             Action
                                         </th>
                                     </thead>
                                     <tbody>
-                                        @if ($data_klhks->isEmpty())
+                                        @if ($users->isEmpty())
                                             <tr>
                                                 <td colspan="6" class="text-center">Tidak ada data tersedia</td>
                                             </tr>
                                         @else
-                                            @foreach ($data_klhks as $dataklhk)
+                                            @foreach ($users as $data_user)
                                                 <tr>
                                                     <td class="text-center">
                                                         {{ $loop->iteration }}
                                                     </td>
                                                     <td class="text-center">
-                                                        {{ $dataklhk['tanggal'] }}
+                                                        {{ $data_user['name'] }}
                                                     </td>
                                                     <td class="text-center">
-                                                        {{ $dataklhk['SO2'] }}
+                                                        {{ $data_user['email'] }}
                                                     </td>
                                                     <td class="text-center">
-                                                        {{ $dataklhk['CO'] }}
+                                                        {{ $data_user['password'] }}
                                                     </td>
                                                     <td class="text-center">
-                                                        {{ $dataklhk['O3'] }}
+                                                        {{ $data_user['role'] }}
                                                     </td>
-                                                    <td class="text-center">
-                                                        {{ $dataklhk['NO2'] }}
-                                                    </td>
-                                                    <td class="text-center">
-                                                        {{ $dataklhk['HC'] }}
-                                                    </td>
-                                                    <td class="text-center">
-                                                        {{ $dataklhk['PM10'] }}
-                                                    </td>
-                                                    <td class="text-center">
-                                                        {{ $dataklhk['PM2_5'] }}
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <div
-                                                            class="
-                                                    @if ($dataklhk['status'] === 'Sedang Diajukan') sedang-diajukan
-                                                    @elseif($dataklhk['status'] === 'Terverifikasi') terverifikasi
-                                                    @elseif($dataklhk['status'] === 'Perlu Revisi') perlu-revisi @endif">
-                                                            {{ $dataklhk['status'] }}
-                                                        </div>
-                                                    </td>
-                                                    {{-- @if (Auth::user()->role === 'admin') --}}
+
 
                                                     <td class="text-center">
-                                                        {{ $dataklhk->user ? $dataklhk->user->name : 'Nama tidak tersedia' }}
-                                                    </td>
-                                                    {{-- @endif --}}
-
-                                                    <td class="text-center">
-                                                        <a href="{{ route('data_klhk.edit', $dataklhk->id) }}"
+                                                        <a href="{{ route('data_user.edit', $data_user->id) }}"
                                                             class="btn btn-sm btn-primary"><img class="button-icons"
                                                                 src="/storage/img/pencil-square.svg" alt="Edit Icon"
                                                                 width="16" height="16"></a>
-                                                        <form
-                                                            action="{{ route('data_klhk.destroy', $dataklhk->id) }}"
+                                                        {{-- <form action="{{ route('data_user.destroy', $data_user->id) }}"
                                                             method="POST" style="display: inline-block;">
                                                             @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="btn btn-sm btn-danger">
-                                                                <img class="button-icons" src="/storage/img/trash3.svg"
-                                                                    alt="Edit Icon" width="16" height="16">
-                                                            </button>
-                                                        </form>
+                                                            @method('DELETE') --}}
+                                                        <button type="submit" class="btn btn-sm btn-danger"
+                                                            data-toggle="modal"
+                                                            data-target="#modalDelete{{ $data_user->id }}">
+                                                            <img class="button-icons" src="/storage/img/trash3.svg"
+                                                                alt="Edit Icon" width="16" height="16">
+                                                        </button>
+                                                        {{-- </form> --}}
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -236,5 +171,43 @@
                 </nav>
             </div>
         </footer>
+
+        {{-- Modal Delete --}}
+        @foreach ($users as $data_user)
+            <div class="modal fade" id="modalDelete{{ $data_user->id }}" tabindex="-1" role="dialog"
+                aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                <form action="{{ route('data_user.destroy', $data_user->id) }}" method="POST"
+                    enctype="multipart/form-data">
+                    @csrf
+                    @method('DELETE')
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLongTitle">Delete Confirmation</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                {{-- Are you sure you want to delete this item? --}}
+                                <p>Anda yakin ingin mengahapus user <strong>{{ $data_user->name }}</strong>?</p>
+                                <p>
+                                    <strong>Note:</strong> Menghapus pengguna ini akan secara otomatis menghapus semua
+                                    data yang dibuat oleh pengguna tersebut.
+                                    Disarankan untuk tidak menghapusnya agar data tetap
+                                    terjaga.
+                                </p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+
+                                <button type="submit" class="btn btn-primary">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        @endforeach
+
     </div>
 @endsection

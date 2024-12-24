@@ -28,8 +28,12 @@ class DataBeritaAcara extends Model
     public $timestamps = true;
 
 
+    // public function penguji()
+    // {
+    //     return $this->hasMany(DataPenguji::class);
+    // }
     public function penguji()
     {
-        return $this->hasMany(DataPenguji::class);
+        return $this->hasMany(DataPenguji::class, 'berita_id');
     }
 }

@@ -13,16 +13,22 @@ class DataPartikulat extends Model
     }
     use HasFactory;
 
-    protected $table = 'data_partikulats';
+    public function dataKawasan()
+    {
+        return $this->belongsTo(DataKawasan::class, 'kawasan_id');
+    }
 
+    protected $table = 'data_partikulats';
     protected $fillable = [
+        'nama_lokasi',
+        'longitude',
+        'latitude',
         'tahun',
         'TPM',
         'PM10',
         'PM2_5',
+        'kawasan_id',
         'user_id',
-        'nama_lokasi',
-        'titik_koordinat',
         'status'
     ];
     public $timestamps = true;

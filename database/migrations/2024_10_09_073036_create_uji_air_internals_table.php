@@ -17,7 +17,8 @@ return new class extends Migration
             $table->date('tanggal');
             $table->string('nama_lokasi');
             $table->string('wilayah_lokasi');
-            $table->string('titik_koordinat');
+            $table->string('longitude')->nullable();
+            $table->string('latitude')->nullable();
             $table->float('pH');
             $table->float('DO');
             $table->float('BOD');
@@ -27,6 +28,7 @@ return new class extends Migration
             $table->float('fosfat');
             $table->float('fecal_coli');
             $table->float('kelas');
+            $table->string('isMarker')->default('0');
             $table->enum('status', ['Sedang Diajukan','Terverifikasi','Perlu Revisi'])->default('Sedang Diajukan');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
         });

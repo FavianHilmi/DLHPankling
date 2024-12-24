@@ -17,7 +17,10 @@
                 $table->date('pemasangan');
                 $table->date('pelepasan');
                 $table->string('semester');
+                $table->string('lokasi');
                 $table->foreignId('kawasan_id')->nullable()->constrained('data_kawasans')->onDelete('set null');
+                $table->string('longitude')->nullable();
+                $table->string('latitude')->nullable();
                 $table->float('SO2');
                 $table->float('NO2');
                 $table->foreignId('user_id')->constrained()->onDelete('cascade');

@@ -14,14 +14,16 @@ class DataPartikulatRequest extends FormRequest
     public function rules(): array
     {
         return [
+            // Optional: You might want to comment this out since you assign user_id in the controller
+            // 'user_id' => 'required|exists:users,id',
+            'nama_lokasi' => 'required|string|max:255',
+            'longitude' => 'required|string',
+            'latitude' => 'required|string',
             'tahun' => 'required|string',
             'TPM' => 'required|numeric',
             'PM10' => 'required|numeric',
             'PM2_5' => 'required|numeric',
-            // Optional: You might want to comment this out since you assign user_id in the controller
-            // 'user_id' => 'required|exists:users,id',
-            'nama_lokasi' => 'required|string|max:255',
-            'titik_koordinat' => 'required|string|max:255',
+            'kawasan_id' => 'nullable|exists:data_kawasans,id',
         ];
     }
 }

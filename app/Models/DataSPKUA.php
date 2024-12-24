@@ -14,6 +14,8 @@ class DataSPKUA extends Model
     protected $fillable = [
         'tanggal',
         'lokasi',
+        'longitude',
+        'latitude',
         'PM10',
         'PM2_5',
         'SO2',

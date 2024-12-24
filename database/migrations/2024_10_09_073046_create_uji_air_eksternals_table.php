@@ -17,45 +17,45 @@ return new class extends Migration
             $table->date('tanggal');
             $table->string('nama_lokasi');
             $table->string('wilayah_lokasi');
-            $table->string('titik_koordinat');
-
-            $table->float('temperature');
-            $table->float('TDS'); // Total Dissolved Solids
-            $table->float('TSS'); // Total Suspended Solids
-            $table->string('colour');
-            $table->float('pH');
-            $table->float('BOD'); // Biochemical Oxygen Demand
-            $table->float('COD'); // Chemical Oxygen Demand
-            $table->float('DO'); // Dissolved Oxygen
-            $table->float('sulfate');
-            $table->float('chloride');
-            $table->float('nitrate');
-            $table->float('nitrite');
-            $table->float('ammonia');
-            $table->float('total_n');
-            $table->float('total_phosphate');
-            $table->float('fluoride');
-            $table->float('sulfide');
-            $table->float('cyanide');
-            $table->float('free_chlorine');
-            $table->float('boron');
-            $table->float('mercury');
-            $table->float('arsenic');
-            $table->float('selenium');
-            $table->float('cadmium');
-            $table->float('cobalt');
-            $table->float('nickel');
-            $table->float('zinc');
-            $table->float('copper');
-            $table->float('lead');
-            $table->float('hexavalent_chromium');
-            $table->float('oil_and_grease');
-            $table->float('surfactants');
-            $table->float('phenol');
-            $table->float('fecal_coli');
-            $table->float('total_coli');
-            $table->string('waste');
-
+            $table->string('longitude')->nullable();
+            $table->string('latitude')->nullable();
+            $table->float('temperature')->nullable();
+            $table->float('TDS')->nullable();
+            $table->float('TSS')->nullable();
+            $table->float('colour')->nullable();
+            $table->float('pH')->nullable();
+            $table->float('BOD')->nullable();
+            $table->float('COD')->nullable();
+            $table->float('DO')->nullable();
+            $table->float('sulfate')->nullable();
+            $table->float('chloride')->nullable();
+            $table->float('nitrate')->nullable();
+            $table->float('nitrite')->nullable();
+            $table->float('ammonia')->nullable();
+            $table->float('total_n')->nullable();
+            $table->float('total_phosphate')->nullable();
+            $table->float('fluoride')->nullable();
+            $table->float('sulfide')->nullable();
+            $table->float('cyanide')->nullable();
+            $table->float('free_chlorine')->nullable();
+            $table->float('boron')->nullable();
+            $table->float('mercury')->nullable();
+            $table->float('arsenic')->nullable();
+            $table->float('selenium')->nullable();
+            $table->float('cadmium')->nullable();
+            $table->float('cobalt')->nullable();
+            $table->float('nickel')->nullable();
+            $table->float('zinc')->nullable();
+            $table->float('copper')->nullable();
+            $table->float('lead')->nullable();
+            $table->float('hexavalent_chromium')->nullable();
+            $table->float('oil_and_grease')->nullable();
+            $table->float('surfactants')->nullable();
+            $table->float('phenol')->nullable();
+            $table->float('fecal_coli')->nullable();
+            $table->float('total_coli')->nullable();
+            $table->float('waste')->nullable();
+            $table->string('isMarker')->default('0');
             $table->enum('status', ['Sedang Diajukan', 'Terverifikasi', 'Perlu Revisi'])->default('Sedang Diajukan');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
         });

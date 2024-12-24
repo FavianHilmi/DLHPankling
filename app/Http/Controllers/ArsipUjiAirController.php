@@ -6,16 +6,46 @@ use App\Models\ArsipUjiAir;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\ArsipUjiAirRequest;
+use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class ArsipUjiAirController extends Controller
 {
-    public function index()
+    // public function index()
+    // {
+    //     $arsip_data_air_internals = ArsipUjiAir::with('user')->get();
+    //     // $data_partikulats = ArsipUjiAir::all();
+    //     return view('arsip_uji_air', compact('arsip_data_air_internals'));
+    // }
+    public function index(Request $request)
     {
-        $arsip_data_air_internals = ArsipUjiAir::with('user')->get();
-        // $data_partikulats = ArsipUjiAir::all();
+
+        $request->validate([
+            'bulan' => 'nullable|digits:2|numeric|min:1|max:12',
+            'tahun' => 'nullable|digits:4|numeric|min:2000|max:' . date('Y'),
+            'nama_lokasi' => 'nullable|string|max:255',
+        ]);
+
+        $sortBy = $request->get('sort_by', 'id');
+        $sortOrder = $request->get('sort_order', 'asc');
+        $bulan = $request->get('bulan');
+        $tahun = $request->get('tahun');
+
+        $arsip_data_air_internals = ArsipUjiAir::with('user')
+            ->when($request->nama_lokasi, function ($query) use ($request) {
+                return $query->where('nama_lokasi', 'like', '%' . $request->nama_lokasi . '%');
+            })
+            ->when($bulan, function ($query) use ($bulan) {
+                return $query->whereMonth('bulan', $bulan);
+            })
+            ->when($tahun, function ($query) use ($tahun) {
+                return $query->whereYear('tahun', $tahun);
+            })
+            ->orderBy($sortBy, $sortOrder)
+            ->paginate(50);
+
         return view('arsip_uji_air', compact('arsip_data_air_internals'));
     }
-
     public function create()
     {
         return view('form_arsip_uji_air');
@@ -91,5 +121,88 @@ class ArsipUjiAirController extends Controller
         $arsipUjiAir = ArsipUjiAir::findOrFail($id);
         $arsipUjiAir->delete();
         return redirect()->route('arsip_uji_air.index')->with('success', 'Data berhasil dihapus.');
+    }
+
+    // form import
+    public function showImportForm()
+    {
+        return view('import_arsip_uji_air');
+    }
+
+    public function import(Request $request)
+    {
+        if (!$request->hasFile('file') || !$request->file('file')->isValid()) {
+            return back()->with('error', 'File tidak valid!');
+        }
+
+        $extension = $request->file('file')->getClientOriginalExtension();
+        if (!in_array($extension, ['xls', 'xlsx'])) {
+            return back()->with('error', 'File harus berupa Excel dengan ekstensi .xls atau .xlsx!');
+        }
+
+        $file = $request->file('file');
+        $spreadsheet = IOFactory::load($file->getRealPath());
+        $worksheet = $spreadsheet->getSheetByName('Sheet1');
+
+        if (!$worksheet) {
+            return back()->with('error', 'Data Gagal Ditambahkan, "Sheet1" tidak ditemukan!');
+        }
+
+        $rows = $worksheet->toArray();
+        $data = [];
+        $errors = [];
+
+        foreach ($rows as $index => $row) {
+            if ($index == 0)
+                continue;
+
+            if (empty(array_filter($row))) {
+                continue;
+            }
+
+            $tanggal = \DateTime::createFromFormat('m/d/Y', $row[0]) ?: \DateTime::createFromFormat('d/m/Y', $row[0]);
+            $formattedTanggal = $tanggal ? $tanggal->format('Y-m-d') : null;
+
+            if (!$formattedTanggal) {
+                $errors[] = "Baris " . ($index + 1) . ": Tanggal tidak valid.";
+                continue;
+            }
+
+            if (!is_numeric($row[3]) || !is_numeric($row[4])) {
+                $errors[] = "Baris " . ($index + 1) . ": Longitude atau Latitude tidak valid.";
+                continue;
+            }
+
+            $data[] = [
+
+                'bulan' => $row[1],
+                'tahun' => $row[2],
+                'nama_lokasi' => $row[3],
+                'longitude' => $row[3],
+                'latitude' => $row[4],
+                'BOD' => $row[5],
+                'COD' => $row[6],
+                'TSS' => $row[7],
+                'DO' => $row[8],
+                'pH' => $row[9],
+                'total_coli' => $row[10],
+                'fecal_coli' => $row[11],
+                'isMarker' => $row['isMarker'] ?? '0',
+                'status' => 'Sedang Diajukan',
+                'user_id' => Auth::id(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        if (!empty($data)) {
+            ArsipUjiAir::insert($data);
+        }
+
+        if (!empty($errors)) {
+            return back()->with('error', 'Beberapa baris gagal diimpor: ' . implode(', ', $errors));
+        }
+
+        return redirect()->route('arsip_uji_air.index')->with('success', 'Data berhasil diimpor!');
     }
 }

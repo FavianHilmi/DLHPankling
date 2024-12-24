@@ -14,13 +14,15 @@ return new class extends Migration
         Schema::create('data_partikulats', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
+            $table->string('nama_lokasi');
+            $table->string('longitude')->nullable();
+            $table->string('latitude')->nullable();
             $table->string('tahun');
             $table->float('TPM');
             $table->float('PM10');
             $table->float('PM2_5');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('nama_lokasi');
-            $table->string('titik_koordinat');
+            $table->foreignId('kawasan_id')->nullable()->constrained('data_kawasans')->onDelete('set null');
             $table->enum('status', ['Sedang Diajukan','Terverifikasi','Perlu Revisi'])->default('Sedang Diajukan');
         });
     }

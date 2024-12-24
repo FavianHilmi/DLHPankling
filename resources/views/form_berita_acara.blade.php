@@ -74,7 +74,7 @@
             <div class="row">
                 <div class="col-md-10 mx-auto">
                     <div class="card">
-                        <div class="card-header">
+                        <div class="card-header-form">
                             <h5 class="kop-surat">PEMERINTAH KOTA SURABAYA</h5>
                             <h3 class="kop-surat" style="font-weight: bold">DINAS LINGKUNGAN HIDUP</h3>
                             <p class="kop-surat" style="font-weight: normal">Jl. Raya Menur No.31A, Manyar Sabrangan, Kec.
@@ -83,7 +83,7 @@
                                 dlhsurabaya@gmail.com</p>
                         </div>
                         <div class="card-body">
-                            <form action="{{ route('berita_acara.store') }}" method="POST">
+                            <form action="{{ route('berita_acara.store') }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 <div class="row">
                                     <div class="col-md-6 pr-1">
@@ -121,31 +121,42 @@
                                     </div>
                                 </div>
 
-                                <div class="row" id="penguji-container">
-                                    <div class="col-md-4 pr-1">
-                                        <div class="form-group">
-                                            <label for="nama_penguji" class="form">Nama Penguji</label>
-                                            <input type="text" name="nama_penguji[]" class="form-control" placeholder="Nama Penguji">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4 pr-1">
-                                        <div class="form-group">
-                                            <label for="asal_instansi" class="form">Instansi</label>
-                                            <input type="text" name="asal_instansi[]" class="form-control" placeholder="Instansi">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-2 pr-1">
-                                        <div class="form-group">
-                                            <label for="upload_file" class="form">Tanda Tangan</label>
-                                            <button type="button" class="btn btn-primary">Upload File</button>
-                                        </div>
-                                    </div>
-                                </div>
-
                                 <!-- Tombol untuk Menambah Kolom Penguji -->
                                 <div class="row">
                                     <div class="col-md-12">
-                                        <button type="button" id="add-penguji-btn" class="btn btn-primary">Tambah Penguji</button>
+                                        <button type="button" id="add-penguji-btn" class="btn btn-info">
+                                            <i class="now-ui-icons ui-1_simple-add"></i>
+                                            Add Kolom Penguji
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="row" id="penguji-container" style="display: flex; align-items: center; gap: 15px;">
+                                    <!-- Kolom Penguji Awal -->
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="nama_penguji" class="form">Nama Penguji</label>
+                                            <input type="text" name="penguji[0][nama_penguji]" id="nama_penguji" class="form-control" placeholder="Nama Penguji">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="instansi" class="form">Instansi</label>
+                                            <input type="text" name="penguji[0][instansi]" id="instansi" class="form-control" placeholder="Instansi">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="ttd" class="form">Tanda Tangan</label>
+                                            <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                                                <button type="button" class="btn btn-primary" onclick="document.getElementById('ttd').click();">Upload File</button>
+                                                <input type="file" id="ttd" name="penguji[0][ttd]" accept="image/*" style="display: none;">
+                                                <span id="file_name" style="font-style: italic;">Tidak ada file dipilih</span>
+                                                <span id="clear _file" style="cursor: pointer; color: red; display: none;" onclick="clearFile()">X</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -157,6 +168,7 @@
                                 </div>
                             </form>
                         </div>
+
 
                     </div>
                 </div>
@@ -179,12 +191,28 @@
 @endsection
 
 @section('scripts')
+<script>
+    ClassicEditor
+        .create(document.querySelector('#deskripsi'))
+        .catch(error => {
+            console.error(error);
+        });
+</script>
     <script>
-        ClassicEditor
-            .create(document.querySelector('#deskripsi'))
-            .catch(error => {
-                console.error(error);
-            });
+        // JavaScript untuk menampilkan nama file
+        document.getElementById('ttd').addEventListener('change', function(event) {
+            const fileName = event.target.files[0]?.name || 'Tidak ada file dipilih';
+            document.getElementById('file_name').textContent = fileName;
+            document.getElementById('clear_file').style.display = 'inline'; // Tampilkan tombol silang
+        });
+
+        // Fungsi untuk membatalkan file yang dipilih
+        function clearFile() {
+            const fileInput = document.getElementById('ttd');
+            fileInput.value = ''; // Reset input file
+            document.getElementById('file_name').textContent = 'Tidak ada file dipilih'; // Reset nama file
+            document.getElementById('clear_file').style.display = 'none'; // Sembunyikan tombol silang
+        }
     </script>
     <!-- Link to external JavaScript -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

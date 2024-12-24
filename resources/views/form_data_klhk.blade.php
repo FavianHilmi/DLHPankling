@@ -16,7 +16,7 @@
         <div class="row">
             <div class="col-md-7 mx-auto">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header-form">
                         <h5 class="kop-surat" style="font-weight: bold">FORM TAMBAH DATA KLHK</h5>
                     </div>
                     <div class="card-body">
@@ -27,6 +27,28 @@
                                     <div class="form-group">
                                         <label for="tanggal" class="form">Tanggal</label>
                                         <input type="date" name="tanggal" id="date" class="form-control" placeholder="Tanggal" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 pr-1">
+                                    <div class="form-group">
+                                        <label for="lokasi" class="form">Lokasi</label>
+                                        <input type="text" name="lokasi" id="date" class="form-control" placeholder="Lokasi" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 pr-1">
+                                    <div class="form-group">
+                                        <label for="longitude" class="form">Longitude</label>
+                                        <input type="text" name="longitude" id="longitude" class="form-control" placeholder="longitude" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 pr-1">
+                                    <div class="form-group">
+                                        <label for="latitude" class="form">Latitude</label>
+                                        <input type="text" name="latitude" id="latitude" class="form-control" placeholder="latitude" required>
                                     </div>
                                 </div>
                             </div>

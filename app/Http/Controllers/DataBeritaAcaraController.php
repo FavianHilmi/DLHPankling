@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\DataBeritaAcaraRequest;
 use App\Http\Requests\DataPengujiRequest;
 use PDF;
+use Illuminate\Support\Facades\Log;
 
 class DataBeritaAcaraController extends Controller
 {
@@ -18,8 +19,7 @@ class DataBeritaAcaraController extends Controller
         $id = $request->input('id');
         $berita = DataBeritaAcara::findOrFail($id);
 
-        // Log untuk memeriksa file path
-        \Log::info('Path to PDF:', ['path' => storage_path('app/public/pdfs/' . $berita->pdf_file)]);
+        Log::info('Path to PDF:', ['path' => storage_path('app/public/pdfs/' . $berita->pdf_file)]);
 
         $pathToFile = storage_path('app/public/pdfs/' . $berita->pdf_file);
 
@@ -27,7 +27,7 @@ class DataBeritaAcaraController extends Controller
             return response()->json(['error' => 'File not found'], 404);
         }
 
-        return response()->file($pathToFile); // This will return the file to the browser
+        return response()->file($pathToFile);
     }
 
 
@@ -46,67 +46,113 @@ class DataBeritaAcaraController extends Controller
 
     public function store(Request $request)
     {
-        // Validasi
-        $request->validate([
-            'judul' => 'required|string|max:255',
+        // dd($validated);
+        // dd($request->all());
+        // Validasi request
+        $validated = $request->validate([
+            'judul' => 'required|string',
             'tanggal' => 'required|date',
             'deskripsi' => 'required|string',
             'nama_kolom_penguji' => 'required|string',
-            'nama_penguji' => 'required|array',
-            'nama_penguji.*' => 'required|string',
-            'asal_instansi.*' => 'required|string',
-            'pdf_file' => 'nullable|file|mimes:pdf|max:2048',
+            'penguji.*.nama_penguji' => 'required|string',
+            'penguji.*.instansi' => 'required|string',
+            'penguji.*.ttd' => 'nullable|file|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        // Simpan data
-        $beritaAcara = DataBeritaAcara::create([
-            'judul' => $request->judul,
-            'tanggal' => $request->tanggal,
-            'deskripsi' => $request->deskripsi,
-            'nama_kolom_penguji' => $request->nama_kolom_penguji,
-            'user_id' => Auth::id(),
+        $berita = DataBeritaAcara::create([
+            'judul' => $validated['judul'],
+            'tanggal' => $validated['tanggal'],
+            'deskripsi' => $validated['deskripsi'],
+            'nama_kolom_penguji' => $validated['nama_kolom_penguji'],
             'status' => 'Sedang Diajukan',
+            'user_id' => auth()->user()->id,
         ]);
 
-        // Simpan file
-        if ($request->hasFile('pdf_file')) {
-            $file = $request->file('pdf_file');
-            $path = $file->store('public/pdf');
-            $beritaAcara->update(['pdf_file' => $path]);
-        }
 
-        // Simpan data penguji (looping karena array)
-        foreach ($request->nama_penguji as $key => $namaPenguji) {
-            $beritaAcara->penguji()->create([
-                'nama_penguji' => $namaPenguji,
-                'instansi' => $request->asal_instansi[$key],
-                'ttd' => null, // Tambahkan logika untuk upload TTD jika diperlukan
+        foreach ($validated['penguji'] as $pengujiData) {
+            $filePath = isset($pengujiData['ttd'])
+                ? $pengujiData['ttd']->store('ttd', 'public')
+                : null;
+
+            DataPenguji::create([
+                'nama_kolom_penguji' => $berita->nama_kolom_penguji,
+                'nama_penguji' => $pengujiData['nama_penguji'],
+                'instansi' => $pengujiData['instansi'],
+                // 'ttd' => isset($pengujiData['ttd']) ? $pengujiData['ttd']->store('ttd', 'public') : null,
+                'ttd' => $filePath,
+                'berita_id' => $berita->id,
             ]);
+
+
+
+
         }
 
-        return redirect()->route('berita_acara.index')->with('success', 'Data berhasil disimpan.');
+
+        return redirect()->route('berita_acara.index')->with('success', 'Berita acara dan penguji berhasil disimpan.');
     }
 
 
 
     public function edit($id)
     {
-        // Ambil berita acara berdasarkan ID
         $beritaAcara = DataBeritaAcara::findOrFail($id);
-        return view('berita_acara', compact('beritaAcara'));
+        return view('edit_berita_acara', compact('beritaAcara'));
     }
-
 
     public function update(DataBeritaAcaraRequest $request, $id)
-    {
-        $validatedData = $request->validated();
-        $beritaAcara = DataBeritaAcara::findOrFail($id);
-        $beritaAcara->update($validatedData);
-        return redirect()->route('berita_acara.index')->with('success', 'Data berhasil diperbarui.');
+{
+    $validatedData = $request->validated();
+    $beritaAcara = DataBeritaAcara::findOrFail($id);
+    $beritaAcara->update($validatedData);
 
+    // Delete all previous penguji data (this ensures no old records are left)
+    $beritaAcara->penguji()->delete();
+
+    // To handle the uploaded files for each penguji (if any)
+    $uploadedFiles = [];
+    foreach ($request->penguji as $key => $penguji) {
+        if (isset($penguji['ttd']) && is_file($penguji['ttd'])) {
+            $file = $penguji['ttd'];
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('ttd', $filename, 'public');
+            $uploadedFiles[$key] = $path; // Store file path
+        }
     }
 
+    // Now process the penguji data (adding new penguji or updating them)
+    foreach ($request->penguji as $key => $penguji) {
+        // Add new penguji after deleting old data
+        $beritaAcara->penguji()->create([
+            'nama_penguji' => $penguji['nama_penguji'],
+            'instansi' => $penguji['instansi'],
+            'ttd' => $uploadedFiles[$key] ?? null, // Save file if uploaded
+        ]);
+    }
 
+    return redirect()->route('berita_acara.index')->with('success', 'Data berhasil diperbarui.');
+}
+
+
+
+
+    public function approve($id)
+    {
+        $data = DataBeritaAcara::findOrFail($id);
+        $data->status = 'Terverifikasi';
+        $data->save();
+
+        return redirect()->route('berita_acara.index')->with('success', 'Data berhasil disetujui.');
+    }
+
+    public function revisi($id)
+    {
+        $data = DataBeritaAcara::findOrFail($id);
+        $data->status = 'Perlu Revisi';
+        $data->save();
+
+        return redirect()->route('berita_acara.index')->with('success', 'Data perlu revisi.');
+    }
 
 
     public function destroy($id)

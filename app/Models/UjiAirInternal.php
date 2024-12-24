@@ -14,7 +14,8 @@ class UjiAirInternal extends Model
         'tanggal',
         'nama_lokasi',
         'wilayah_lokasi',
-        'titik_koordinat',
+        'longitude',
+        'latitude',
         'pH',
         'DO',
         'BOD',
@@ -23,7 +24,8 @@ class UjiAirInternal extends Model
         'nitrat',
         'fosfat',
         'fecal_coli',
-        'kelas'
+        'kelas',
+        'isMarker'
     ];
     public function user()
     {

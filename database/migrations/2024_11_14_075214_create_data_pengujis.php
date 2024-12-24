@@ -13,10 +13,10 @@ return new class extends Migration {
         Schema::create('data_pengujis', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->string('nama_kolom_penguji');
+            // $table->string('nama_kolom_penguji');
             $table->string('nama_penguji');
             $table->string('instansi');
-            $table->foreignId('berita_id')->nullable()->constrained('beritas')->onDelete('cascade');
+            $table->foreignId('berita_id')->constrained('beritas')->onDelete('cascade');
             $table->string('ttd')->nullable();
         });
     }

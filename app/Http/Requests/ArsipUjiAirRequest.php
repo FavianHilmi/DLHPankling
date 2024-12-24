@@ -17,7 +17,8 @@ class ArsipUjiAirRequest extends FormRequest
             'bulan' => 'required|string',
             'tahun' => 'required|string',
             'nama_lokasi' => 'required|string',
-            'titik_koordinat' => 'required|string',
+            'longitude' => 'required|string',
+            'latitude' => 'required|string',
             'BOD' => 'required|numeric',
             'COD' => 'required|numeric',
             'TSS' => 'required|numeric',
@@ -25,6 +26,7 @@ class ArsipUjiAirRequest extends FormRequest
             'pH' => 'required|numeric',
             'total_coli' => 'required|numeric',
             'fecal_coli' => 'required|numeric',
+            'isMarker' => 'required|string',
         ];
     }
 }

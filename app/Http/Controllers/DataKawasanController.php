@@ -4,64 +4,42 @@ namespace App\Http\Controllers;
 
 use App\Models\DataKawasan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\DataKawasanRequest;
 
 class DataKawasanController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $data_kawasans = DataKawasan::all();
+        return view('data_kawasan.index', compact('data_kawasans'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        $data_kawasans = DataKawasan::all(); // Assuming Kawasan is your model
-        return view('form_data_passive', compact('data_kawasans'));
+        return view('data_kawasan.create');
     }
 
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(DataKawasanRequest $request)
     {
-        //
+        DataKawasan::create($request->validated());
+        return redirect()->route('data_kawasan.index')->with('success', 'Data Kawasan berhasil disimpan.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(DataKawasan $dataKawasan)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(DataKawasan $dataKawasan)
     {
-        //
+        return view('data_kawasan.edit', compact('dataKawasan'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, DataKawasan $dataKawasan)
+    public function update(DataKawasanRequest $request, DataKawasan $dataKawasan)
     {
-        //
+        $dataKawasan->update($request->validated());
+        return redirect()->route('data_kawasan.index')->with('success', 'Data Kawasan berhasil diperbarui.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(DataKawasan $dataKawasan)
     {
-        //
+        $dataKawasan->delete();
+        return redirect()->route('data_kawasan.index')->with('success', 'Data Kawasan berhasil dihapus.');
     }
 }

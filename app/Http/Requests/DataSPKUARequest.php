@@ -19,7 +19,8 @@ class DataSPKUARequest extends FormRequest
         return [
             'tanggal' => 'required|date',
             'lokasi' => 'required|string',
-            // 'pelepasan' => 'required|date',
+            'longitude' => 'required|string',
+            'latitude' => 'required|string',
             'PM10' => 'required|numeric',
             'PM2_5' => 'required|numeric',
             'SO2' => 'required|numeric',
