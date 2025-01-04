@@ -9,6 +9,7 @@ use App\Http\Requests\DataSPKUARequest;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class DataSPKUAController extends Controller
 {
@@ -188,10 +189,10 @@ class DataSPKUAController extends Controller
     //     }
 
     //     if (!empty($errors)) {
-    //         return back()->with('error', 'Beberapa baris gagal diimpor: ' . implode(', ', $errors));
+    //         return back()->with('error', 'Beberapa baris gagal diunggah: ' . implode(', ', $errors));
     //     }
 
-    //     return redirect()->route('data_spkua.index')->with('success', 'Data berhasil diimpor!');
+    //     return redirect()->route('data_spkua.index')->with('success', 'Data berhasil diunggah!');
     // }
 
     public function import(Request $request)
@@ -264,10 +265,10 @@ class DataSPKUAController extends Controller
             }
 
             if (!empty($errors)) {
-                return back()->with('error', 'Beberapa baris gagal diimpor: ' . implode(', ', $errors));
+                return back()->with('error', 'Beberapa baris gagal diunggah: ' . implode(', ', $errors));
             }
 
-            return redirect()->route('data_spkua.index')->with('success', 'Data berhasil diimpor!');
+            return redirect()->route('data_spkua.index')->with('success', 'Data berhasil diunggah!');
         } catch (\Exception $e) {
             // Log error untuk debugging
             Log::error('Import Error: ' . $e->getMessage());
@@ -276,5 +277,13 @@ class DataSPKUAController extends Controller
             return back()->with('error', 'Terjadi kesalahan saat mengimpor data: ' . $e->getMessage());
         }
     }
+    public function downloadTemplate()
+    {
+        $filePath = 'templates/data_spkua_entry_form.xlsx';
+        if (Storage::exists($filePath)) {
+            return response()->download(storage_path('app/' . $filePath), 'data_spkua_entry_form.xlsx');
+        }
 
+        return redirect()->back()->with('error', 'File tidak ditemukan.');
+    }
 }

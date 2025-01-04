@@ -16,7 +16,7 @@ return new class extends Migration
             $table->timestamps();
             $table->date('tanggal');
             $table->string('nama_lokasi');
-            $table->string('wilayah_lokasi');
+            // $table->string('wilayah_lokasi');
             $table->string('longitude')->nullable();
             $table->string('latitude')->nullable();
             $table->float('pH');

@@ -22,6 +22,14 @@ $dompdf->getOptions()->set('defaultFont', 'tahoma');
 
 class GeneratePDFController extends Controller
 {
+
+    public function refreshChart()
+    {
+        $output = shell_exec('python3 python-scripts/new_project_data (1).py');
+        return response()->json(['message' => 'Chart updated!', 'output' => $output]);
+    }
+
+
     public function generatePDF($id)
     {
         $berita = DataBeritaAcara::findOrFail($id);

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\DataKLHKRequest;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use Illuminate\Support\Facades\Storage;
 
 class DataKLHKController extends Controller
 {
@@ -187,10 +188,19 @@ class DataKLHKController extends Controller
         }
 
         if (!empty($errors)) {
-            return back()->with('error', 'Beberapa baris gagal diimpor: ' . implode(', ', $errors));
+            return back()->with('error', 'Beberapa baris gagal diunggah: ' . implode(', ', $errors));
         }
 
-        return redirect()->route('data_klhk.index')->with('success', 'Data berhasil diimpor!');
+        return redirect()->route('data_klhk.index')->with('success', 'Data berhasil diunggah!');
     }
 
+    public function downloadTemplate()
+    {
+        $filePath = 'templates/data_klhk_entry_form.xlsx';
+        if (Storage::exists($filePath)) {
+            return response()->download(storage_path('app/' . $filePath), 'data_klhk_entry_form.xlsx');
+        }
+
+        return redirect()->back()->with('error', 'File tidak ditemukan.');
+    }
 }

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\DataPassiveRequest;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use Illuminate\Support\Facades\Storage;
 class DataPassiveController extends Controller
 {
     // Tampilkan daftar data
@@ -173,16 +174,24 @@ class DataPassiveController extends Controller
     if (!empty($data)) {
         DataPassive::insert($data);
     } else {
-        return back()->with('error', 'Tidak ada data yang berhasil diimpor!');
+        return back()->with('error', 'Tidak ada data yang berhasil diunggah!');
     }
 
     if (!empty($errors)) {
-        return back()->with('error', 'Beberapa baris gagal diimpor: ' . implode(', ', $errors));
+        return back()->with('error', 'Beberapa baris gagal diunggah: ' . implode(', ', $errors));
     }
 
-    return redirect()->route('data_passive.index')->with('success', 'Data berhasil diimpor!');
+    return redirect()->route('data_passive.index')->with('success', 'Data berhasil diunggah!');
 }
 
+public function downloadTemplate()
+{
+    $filePath = 'templates/data_passive_sampler_entry_form.xlsx';
+    if (Storage::exists($filePath)) {
+        return response()->download(storage_path('app/' . $filePath), 'data_passive_sampler_entry_form.xlsx');
+    }
 
+    return redirect()->back()->with('error', 'File tidak ditemukan.');
+}
 
 }

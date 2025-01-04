@@ -23,6 +23,7 @@ class DataSPKUA extends Model
         'O3',
         'NO2',
         'HC',
+        'kategori',
         'user_id',
         'status'
     ];

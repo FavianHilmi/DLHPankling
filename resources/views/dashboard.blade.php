@@ -40,17 +40,19 @@
                                     @csrf
                                     <input type="submit" class="dropdown-item" value="{{ __('Log Out') }}">
                                 </form>
-
                             </div>
-
+                            {{-- <button id="refreshChart" class="btn btn-primary"><i
+                                    class="now-ui-icons loader_refresh spin"></i>Refresh</button> --}}
+                                    <button id="refresh-chart-btn" class="btn btn-primary">Refresh Chart</button>
+                                    <div id="chart-update-status"></div>
                         </li>
                     </ul>
                 </div>
             </div>
         </nav>
         <!-- End Navbar -->
-        <div class="panel-header panel-header-lg">
-            <canvas id="bigDashboardChart"></canvas>
+        <div class="panel-header panel-header-sm">
+            {{-- <canvas id="bigDashboardChart"></canvas> --}}
         </div>
         <div class="content">
             <div class="row">
@@ -117,32 +119,33 @@
                     </div>
                 </div> --}}
                 <div class="col-lg-8 col-md-6">
-                    <div class="card card-chart">
+                    <div class="card">
                         <div class="card-header">
-                            <h5 class="card-category">*Berdasarkan Pengujian Eksternal</h5>
-                            <h4 class="card-title">Rata-Rata Konsentrasi Kualitas Udara Selama 30 Hari</h4>
-                        </div>
-                        <div class="card-body">
-                            <div class="chart-area">
-                                {{-- <img class="chart-img" src="{{ asset('img/air_quality_piechart.png') }}" alt="Air Quality Piechart"> --}}
+                            <h5 class="card-category">Berdasarkan Perhitungan Data KLHK</h5>
+                            <h4 class="card-title"> Prediksi Kualitas Udara Selama 30 Hari (Tandes)</h4>
+                            <div class="card-body" style="padding-bottom: 0">
+                                <img class="linechart-img img-fluid" src="{{ asset('img/air_quality_linechart2.png') }}"
+                                    alt="Air Quality Piechart">
                             </div>
                         </div>
-                        <div class="card-footer">
-                            <div class="stats">
-                                <i class="now-ui-icons ui-2_time-alarm"></i> Last 7 days
+                        {{-- <div class="card-body">
+                            <div class="table-responsive">
+
                             </div>
-                        </div>
+                        </div> --}}
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="card card-chart">
-                        <div class="card-header">
-                            <h5 class="card-category">*Berdasarkan Pengujian Eksternal</h5>
-                            <h4 class="card-title">Rata-Rata Konsentrasi Kualitas Udara Selama 30 Hari</h4>
+                        <div class="card-header" style="padding-bottom: 0">
+                            <h5 class="card-category">Perhitungan 30 Hari</h5>
+                            <h4 class="card-title">Distribusi Parameter yang Mempengaruhi Kualitas Udara</h4>
                         </div>
-                        <div class="card-body">
+                        <div class="card-body" style="padding-bottom: 0">
                             <div class="chart-area">
-                                <img class="chart-img" src="{{ asset('img/air_quality_piechart.png') }}" alt="Air Quality Piechart">
+                                <img class="chart-img" src="{{ asset('img/distribusi_param_spkua_piechart.png') }}"
+                                    alt="Parameter">
+                                {{-- <canvas id="barChartSimpleGradientsNumbers"></canvas> --}}
                             </div>
                         </div>
                         <div class="card-footer">
@@ -152,8 +155,110 @@
                         </div>
                     </div>
                 </div>
+                <div class="col-lg-8 col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-category">Berdasarkan Perhitungan Data SPKUA</h5>
+                            <h4 class="card-title"> Prediksi Kualitas Udara Selama 30 Hari (Wonorejo)</h4>
+                            <div class="card-body" style="padding-bottom: 0">
+                                <img class="linechart-img img-fluid" src="{{ asset('img/air_quality_linechart2.png') }}"
+                                    alt="Air Quality Piechart">
+                            </div>
+                        </div>
+                        {{-- <div class="card-body">
+                            <div class="table-responsive">
 
+                            </div>
+                        </div> --}}
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="card card-chart">
+                        <div class="card-header" style="padding-bottom: 0">
+                            <h5 class="card-category">Perhitungan 30 Hari</h5>
+                            <h4 class="card-title">Distribusi Parameter yang Mempengaruhi Kualitas Udara</h4>
+                        </div>
+                        <div class="card-body" style="padding-bottom: 0">
+                            <div class="chart-area">
+                                <img class="chart-img" src="{{ asset('img/distribusi_param_spkua_piechart.png') }}"
+                                    alt="Parameter">
+                                {{-- <canvas id="barChartSimpleGradientsNumbers"></canvas> --}}
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="stats">
+                                <i class="now-ui-icons ui-2_time-alarm"></i> Last 7 days
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-8 col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-category">Berdasarkan Perhitungan Data SPKUA</h5>
+                            <h4 class="card-title"> Prediksi Kualitas Udara Selama 30 Hari (Kebonsari)</h4>
+                            <div class="card-body" style="padding-bottom: 0">
+                                <img class="linechart-img img-fluid" src="{{ asset('img/air_quality_linechart2.png') }}"
+                                    alt="Air Quality Piechart">
+                            </div>
+                        </div>
+                        {{-- <div class="card-body">
+                            <div class="table-responsive">
 
+                            </div>
+                        </div> --}}
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="card card-chart">
+                        <div class="card-header" style="padding-bottom: 0">
+                            <h5 class="card-category">Perhitungan 30 Hari</h5>
+                            <h4 class="card-title">Distribusi Parameter yang Mempengaruhi Kualitas Udara</h4>
+                        </div>
+                        <div class="card-body" style="padding-bottom: 0">
+                            <div class="chart-area">
+                                <img class="chart-img" src="{{ asset('img/distribusi_param_spkua_piechart.png') }}"
+                                    alt="Parameter">
+                                {{-- <canvas id="barChartSimpleGradientsNumbers"></canvas> --}}
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="stats">
+                                <i class="now-ui-icons ui-2_time-alarm"></i> Last 7 days
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card  card-tasks">
+                        <div class="card-header ">
+                            <h5 class="card-category">Backend development</h5>
+                            <h4 class="card-title">Prediksi Kualitas Udara untuk 30 Hari Mendatang</h4>
+                        </div>
+                        {{-- <div class="card-body">
+                            <canvas id="airQualityChart"></canvas>
+                            <div id="chart-data"
+                                 data-labels="{{ $labels }}"
+                                 data-pm10="{{ $PM10 }}"
+                                 data-pm25="{{ $PM2_5 }}">
+                            </div>
+                        </div> --}}
+                        <div class="card-body">
+                            <img class="linechart-img img-fluid" src="{{ asset('img/linechart_wonorejo.png') }}"
+                                alt="Air Quality Piechart">
+                        </div>
+
+                        <div class="card-footer ">
+                            <hr>
+                            <div class="stats">
+                                <i class="now-ui-icons loader_refresh spin"></i> Updated 3 minutes ago
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="row">
                 <div class="col-md-12">
@@ -171,8 +276,31 @@
                             </div>
                         </div> --}}
                         <div class="card-body">
-                            <img class="linechart-img img-fluid" src="{{ asset('img/air_quality_chart.png') }}"
+                            <img class="linechart-img img-fluid" src="{{ asset('img/linechart_kebonsari.png') }}"
                                 alt="Air Quality Piechart">
+                        </div>
+
+                        <div class="card-footer ">
+                            <hr>
+                            <div class="stats">
+                                <i class="now-ui-icons loader_refresh spin"></i> Updated 3 minutes ago
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card  card-tasks">
+                        <div class="card-header" style="padding-bottom: 0px">
+
+                            <h5 class="card-category">Backend development</h5>
+                            <h4 class="card-title">Prediksi Kualitas Udara untuk 30 Hari Mendatang</h4>
+                        </div>
+                        <div class="card-body" style="padding-bottom: 0px">
+                            <img class="piechart-wono-kebon-img img-fluid"
+                                src="{{ asset('img/distribusi_param_kedua_lokasi.png') }}" alt="Air Quality Piechart">
                         </div>
 
                         <div class="card-footer ">
@@ -379,6 +507,96 @@
                     </div>
                 </div> --}}
             </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card  card-tasks">
+                        <div class="card-header ">
+                            <h5 class="card-category">Backend development</h5>
+                            <h4 class="card-title">Rata-rata Kualitas Udara tahunan di Wonorejo dan Kebonsari (2019-2024)
+                            </h4>
+                        </div>
+                        {{-- <div class="card-body">
+                            <canvas id="airQualityChart"></canvas>
+                            <div id="chart-data"
+                                 data-labels="{{ $labels }}"
+                                 data-pm10="{{ $PM10 }}"
+                                 data-pm25="{{ $PM2_5 }}">
+                            </div>
+                        </div> --}}
+                        <div class="card-body">
+                            <img class="linechart-img img-fluid" src="{{ asset('img/air_quality_average_WonKeb.png') }}"
+                                alt="Air Quality Average">
+                        </div>
+
+                        <div class="card-footer ">
+                            <hr>
+                            <div class="stats">
+                                <i class="now-ui-icons loader_refresh spin"></i> Updated 3 minutes ago
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card  card-tasks">
+                        <div class="card-header ">
+                            <h5 class="card-category">Backend development</h5>
+                            <h4 class="card-title">Rata-rata Kualitas Udara tahunan di Wonorejo dan Kebonsari (2019-2024)
+                            </h4>
+                        </div>
+                        {{-- <div class="card-body">
+                            <canvas id="airQualityChart"></canvas>
+                            <div id="chart-data"
+                                 data-labels="{{ $labels }}"
+                                 data-pm10="{{ $PM10 }}"
+                                 data-pm25="{{ $PM2_5 }}">
+                            </div>
+                        </div> --}}
+                        <div class="card-body">
+                            <img class="linechart-img img-fluid" src="{{ asset('img/water_quality_by_year.png') }}"
+                                alt="Water Quality">
+                        </div>
+
+                        <div class="card-footer ">
+                            <hr>
+                            <div class="stats">
+                                <i class="now-ui-icons loader_refresh spin"></i> Updated 3 minutes ago
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card  card-tasks">
+                        <div class="card-header ">
+                            <h5 class="card-category">Backend development</h5>
+                            <h4 class="card-title">Rata-rata Kualitas Udara tahunan di Wonorejo dan Kebonsari (2019-2024)
+                            </h4>
+                        </div>
+                        {{-- <div class="card-body">
+                            <canvas id="airQualityChart"></canvas>
+                            <div id="chart-data"
+                                 data-labels="{{ $labels }}"
+                                 data-pm10="{{ $PM10 }}"
+                                 data-pm25="{{ $PM2_5 }}">
+                            </div>
+                        </div> --}}
+                        <div class="card-body">
+                            <img class="linechart-img img-fluid" src="{{ asset('img/water_quality_distribution.png') }}"
+                                alt="Water Quality Distribution">
+                        </div>
+
+                        <div class="card-footer ">
+                            <hr>
+                            <div class="stats">
+                                <i class="now-ui-icons loader_refresh spin"></i> Updated 3 minutes ago
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <footer class="footer">
             <div class=" container-fluid ">
@@ -415,5 +633,29 @@
                 </nav>
             </div>
         </footer>
+        <script>
+            document.getElementById('refresh-chart-btn').addEventListener('click', function() {
+                fetch('{{ route('refresh.chart') }}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        const statusDiv = document.getElementById('chart-update-status');
+                        if (data.success) {
+                            statusDiv.innerHTML = '<div class="alert alert-success">' + data.message + '</div>';
+                            // Reload gambar chart
+                            const chartImg = document.getElementById('chart-img');
+                            chartImg.src = chartImg.src.split('?')[0] + '?' + new Date().getTime();
+                        } else {
+                            statusDiv.innerHTML = '<div class="alert alert-danger">' + data.message + '</div>';
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            });
+        </script>
     </div>
 @endsection

@@ -15,29 +15,29 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class DataPartikulatController extends Controller
 {
     public function index(Request $request)
-{
-    $request->validate([
-        'tahun' => 'nullable|digits:4|numeric|min:2000|max:' . date('Y'),
-        'nama_lokasi' => 'nullable|string|max:255',
-    ]);
+    {
+        $request->validate([
+            'tahun' => 'nullable|digits:4|numeric|min:2000|max:' . date('Y'),
+            'nama_lokasi' => 'nullable|string|max:255',
+        ]);
 
-    $sortBy = $request->get('sort_by', 'id');
-    $sortOrder = $request->get('sort_order', 'asc');
-    $tahun = $request->get('tahun');
-    $nama_lokasi = $request->get('nama_lokasi');
+        $sortBy = $request->get('sort_by', 'id');
+        $sortOrder = $request->get('sort_order', 'asc');
+        $tahun = $request->get('tahun');
+        $nama_lokasi = $request->get('nama_lokasi');
 
-    $data_partikulats = DataPartikulat::with('user')
-        ->when($tahun, function ($query) use ($tahun) {
-            return $query->where('tahun', $tahun);
-        })
-        ->when($nama_lokasi, function ($query) use ($nama_lokasi) {
-            return $query->where('nama_lokasi', 'like', '%' . $nama_lokasi . '%');
-        })
-        ->orderBy($sortBy, $sortOrder)
-        ->paginate(50);
+        $data_partikulats = DataPartikulat::with('user')
+            ->when($tahun, function ($query) use ($tahun) {
+                return $query->where('tahun', $tahun);
+            })
+            ->when($nama_lokasi, function ($query) use ($nama_lokasi) {
+                return $query->where('nama_lokasi', 'like', '%' . $nama_lokasi . '%');
+            })
+            ->orderBy($sortBy, $sortOrder)
+            ->paginate(50);
 
-    return view('data_partikulat', compact('data_partikulats'));
-}
+        return view('data_partikulat', compact('data_partikulats'));
+    }
 
 
 
@@ -67,17 +67,17 @@ class DataPartikulatController extends Controller
     // }
 
 
-    public function __invoke()
-    {
-        $path = storage_path('app/templates/data_partikulat_entry_form.xlsx');
+    // public function __invoke()
+    // {
+    //     $path = storage_path('app/templates/data_partikulat_entry_form.xlsx');
 
-        if (Storage::exists('templates/data_partikulat_entry_form.xlsx')) {
-            // Mengembalikan response untuk mendownload file
-            return response()->download($path, 'data_partikulat_entry_form.xlsx');
-        }
+    //     if (Storage::exists('templates/data_partikulat_entry_form.xlsx')) {
+    //         // Mengembalikan response untuk mendownload file
+    //         return response()->download($path, 'data_partikulat_entry_form.xlsx');
+    //     }
 
-        abort(404, 'File not found');
-    }
+    //     abort(404, 'File not found');
+    // }
 
     public function create()
     {
@@ -238,10 +238,18 @@ class DataPartikulatController extends Controller
         }
 
         if (!empty($errors)) {
-            return back()->with('error', 'Beberapa baris gagal diimpor: ' . implode(', ', $errors));
+            return back()->with('error', 'Beberapa baris gagal diunggah: ' . implode(', ', $errors));
         }
 
-        return redirect()->route('data_partikulat.index')->with('success', 'Data berhasil diimpor!');
+        return redirect()->route('data_partikulat.index')->with('success', 'Data berhasil diunggah!');
     }
+    public function downloadTemplate()
+    {
+        $filePath = 'templates/data_partikulat_entry_form.xlsx';
+        if (Storage::exists($filePath)) {
+            return response()->download(storage_path('app/' . $filePath), 'data_partikulat_entry_form.xlsx');
+        }
 
+        return redirect()->back()->with('error', 'File tidak ditemukan.');
+    }
 }

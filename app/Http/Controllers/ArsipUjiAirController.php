@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\ArsipUjiAirRequest;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use Illuminate\Support\Facades\Storage;
 
 class ArsipUjiAirController extends Controller
 {
@@ -200,9 +201,19 @@ class ArsipUjiAirController extends Controller
         }
 
         if (!empty($errors)) {
-            return back()->with('error', 'Beberapa baris gagal diimpor: ' . implode(', ', $errors));
+            return back()->with('error', 'Beberapa baris gagal diunggah: ' . implode(', ', $errors));
         }
 
-        return redirect()->route('arsip_uji_air.index')->with('success', 'Data berhasil diimpor!');
+        return redirect()->route('arsip_uji_air.index')->with('success', 'Data berhasil diunggah!');
+    }
+
+    public function downloadTemplate()
+    {
+        $filePath = 'templates/data_arsip_air_internal_entry_form.xlsx';
+        if (Storage::exists($filePath)) {
+            return response()->download(storage_path('app/' . $filePath), 'data_arsip_air_internal_entry_form.xlsx');
+        }
+
+        return redirect()->back()->with('error', 'File tidak ditemukan.');
     }
 }

@@ -10,6 +10,7 @@ Original file is located at
 """
 
 import pandas as pd
+import pymysql
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -28,19 +29,33 @@ from sklearn.metrics import classification_report, accuracy_score
 
 ### **Konversi Data menjadi ISPU**
 """
+# Konfigurasi database sesuai file .env Laravel Anda
+db_config = {
+    'host': 'localhost',      # Ganti dengan host database Anda
+    'user': 'root',           # Ganti dengan user database Anda
+    'password': '',           # Ganti dengan password database Anda
+    'database': 'beritadlh',  # Ganti dengan nama database Laravel Anda
+    'charset': 'utf8mb4'
+}
 
-url='https://drive.google.com/file/d/1LGQ3K9CKr3iBPe5jYM7Gc7ia0Z_innCk/view?usp=sharing'
-url='https://drive.google.com/uc?id=' + url.split('/')[-2]
-df1 = pd.read_csv(url)
+# Membuka koneksi ke database
+connection = pymysql.connect(**db_config)
 
-df1.head()
+# Membaca data dari tabel `data_klhks`
+query = "SELECT * FROM data_klhks"
+df1 = pd.read_sql(query, connection)
 
-df1.dtypes
+
+# url='https://drive.google.com/file/d/1zJVlItGdBGVo5x4jdee2xZsz1jldftiM/view?usp=sharing'
+# url='https://drive.google.com/uc?id=' + url.split('/')[-2]
+# df1 = pd.read_csv(url)
+
+# df1.head()
 
 # Tabel baku mutu ISPU
 baku_mutu = {
     "PM10": [(0, 50, 50), (50, 150, 100), (150, 350, 200), (350, 420, 300), (420, 500, 400)],
-    "PM2.5": [(0, 15.5, 50), (15.5, 55.4, 100), (55.4, 150.4, 200), (150.4, 250.4, 300), (250.4, float('inf'), 400)],
+    "PM2_5": [(0, 15.5, 50), (15.5, 55.4, 100), (55.4, 150.4, 200), (150.4, 250.4, 300), (250.4, float('inf'), 400)],
     "SO2": [(0, 52, 50), (52, 180, 100), (180, 400, 200), (400, 800, 300), (800, 1200, 400)],
     "CO": [(0, 4000, 50), (4000, 8000, 100), (8000, 15000, 200), (15000, 30000, 300), (30000, 45000, 400)],
     "O3": [(0, 120, 50), (120, 235, 100), (235, 400, 200), (400, 800, 300), (800, 1000, 400)],
@@ -64,18 +79,19 @@ def calculate_ispu(value, pollutant):
 # Membuat data_ispu dengan hanya kolom yang diinginkan
 df = pd.DataFrame()
 
-# Menambahkan kolom Lokasi dan Tanggal dari df1
-df['Lokasi']  = df1['Lokasi']
-df['X']  = df1['Y']
-df['Y']  = df1['Y']
-df['Tanggal'] = df1['Tanggal']
+# Menambahkan kolom lokasi dan Tanggal dari df1
+df['lokasi']  = df1['lokasi']
+df['longitude']  = df1['longitude']
+df['latitude']  = df1['latitude']
+df['tanggal'] = df1['tanggal']
+df['kategori'] = df1['kategori']
 
 # Mengisi nilai kosong dengan nilai 0
 df1 = df1.fillna(0)
 
 # Menghitung ISPU dan menambahkannya ke data_ispu
 df['PM10'] = df1['PM10'].apply(lambda x: calculate_ispu(x, 'PM10'))
-df['PM2.5'] = df1['PM2.5'].apply(lambda x: calculate_ispu(x, 'PM2.5'))
+df['PM2_5'] = df1['PM2_5'].apply(lambda x: calculate_ispu(x, 'PM2_5'))
 df['SO2'] = df1['SO2'].apply(lambda x: calculate_ispu(x, 'SO2'))
 df['CO'] = df1['CO'].apply(lambda x: calculate_ispu(x, 'CO'))
 df['O3'] = df1['O3'].apply(lambda x: calculate_ispu(x, 'O3'))
@@ -87,13 +103,11 @@ df
 
 """### **Membagi Dataset**"""
 
-df.isna().sum()
-
 # Memfilter data untuk lokasi "Tandes"
-df_tandes = df[df['Lokasi'] == 'Tandes']
+df_tandes = df[df['lokasi'] == 'Tandes']
 
 # Menghapus kolom "X" dan "Y"
-df_tandes = df_tandes.drop(columns=['X', 'Y'])
+df_tandes = df_tandes.drop(columns=['longitude', 'latitude'])
 
 # Reset index dan drop kolom nomor jika berasal dari CSV
 df_tandes = df_tandes.reset_index(drop=True)
@@ -114,10 +128,10 @@ df_testing_tandes.head()
 """### **Mengcopy Data set**"""
 
 # Memfilter data untuk lokasi "Tandes" dan membuat df_tandes
-df_tandes = df_training_tandes[df_training_tandes['Lokasi'] == 'Tandes'].copy()
+df_tandes = df_training_tandes[df_training_tandes['lokasi'] == 'Tandes'].copy()
 
-# Menambahkan kolom "Max" dengan nilai maksimum dari parameter (PM10, PM2.5, SO2, CO, O3, NO2, HC)
-parameter_columns = ['PM10', 'PM2.5', 'SO2', 'CO', 'O3', 'NO2', 'HC']
+# Menambahkan kolom "Max" dengan nilai maksimum dari parameter (PM10, PM2_5, SO2, CO, O3, NO2, HC)
+parameter_columns = ['PM10', 'PM2_5', 'SO2', 'CO', 'O3', 'NO2', 'HC']
 df_tandes['Max'] = df_tandes[parameter_columns].max(axis=1)
 
 # Menambahkan penilaian ISPU berdasarkan nilai "Max"
@@ -133,7 +147,7 @@ def ispu_category(value):
     else:
         return 'Berbahaya'
 
-df_tandes['Kategori'] = df_tandes['Max'].apply(ispu_category)
+df_tandes['kategori'] = df_tandes['Max'].apply(ispu_category)
 
 # Membuat df_tandess yang sama dengan df_tandes
 df_tandess = df_tandes.copy()
@@ -149,11 +163,12 @@ df_tandess.head()
 
 df_tandess.head()
 
+
 """## **Proses 1 membuat algoritma dengan metode KNN**"""
 
 # Pilih variabel independen dan target
-X = df_tandes[['PM10', 'PM2.5', 'SO2', 'CO', 'O3', 'NO2', 'HC']]
-y = df_tandes['Kategori']
+X = df_tandes[['PM10', 'PM2_5', 'SO2', 'CO', 'O3', 'NO2', 'HC']]
+y = df_tandes['kategori']
 
 # Membagi data menjadi data latih dan data uji
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=42)
@@ -202,7 +217,7 @@ plt.show()
 df_testing_tandes = df_testing_tandes.loc[:, ~df_testing_tandes.columns.str.contains('^Nomor')]
 
 # Pilih fitur yang sama dengan data latih
-X_new = df_testing_tandes[['PM10', 'PM2.5', 'SO2', 'CO', 'O3', 'NO2', 'HC']]
+X_new = df_testing_tandes[['PM10', 'PM2_5', 'SO2', 'CO', 'O3', 'NO2', 'HC']]
 
 # Standarisasi data baru dengan scaler yang sudah dilatih
 X_new_scaled = scaler.transform(X_new)
@@ -210,15 +225,14 @@ X_new_scaled = scaler.transform(X_new)
 # Prediksi kualitas udara untuk data baru
 predictions = knn.predict(X_new_scaled)
 
-# Menambahkan hasil prediksi ke data baru tanpa menghapus kolom 'Lokasi' dan 'Tanggal'
+# Menambahkan hasil prediksi ke data baru tanpa menghapus kolom 'lokasi' dan 'tanggal'
 df_testing_tandes['kategori'] = predictions
 
 # Tampilkan hasil prediksi beserta lokasi dan tanggal
 df_tandes_testing_result = df_testing_tandes.reset_index(drop=True)
-df_tandes_testing_result.head()
+print(df_tandes_testing_result.head())
 
 """### **Classification report data Testing**"""
-
 # Tampilkan classification report
 print(classification_report(y_test, y_pred))
 
@@ -230,36 +244,42 @@ df_tandess = df_tandess.drop(columns=['Max'], errors='ignore')
 # Gabungkan df_tandess dan df_tandes_testing_result
 df_tandes_combine = pd.concat([df_tandess, df_tandes_testing_result], ignore_index=True)
 
-# Ganti NaN di 'Kategori' dengan nilai dari 'kategori'
-df_tandes_combine['Kategori'] = df_tandes_combine['Kategori'].fillna(df_tandes_combine['kategori'])
+# Ganti NaN di 'kategori' dengan nilai dari 'kategori'
+df_tandes_combine['kategori'] = df_tandes_combine['kategori'].fillna(df_tandes_combine['kategori'])
 
 # Hapus kolom 'kategori' yang sudah tidak diperlukan
 df_tandes_combine = df_tandes_combine.drop(columns=['kategori'], errors='ignore')
 
 # Tampilkan hasil
 df_tandes_combine
+# print(f"df tandes")
+# print(df_tandes_combine.columns)
 
 """## **Proses Prediksi 30 hari kedepan dengan menggabungkan 2 data sebelumnya**"""
 
 df_tandes.tail()
 
 # Filter data untuk lokasi Tandes
-df_tandes = df_tandes_combine[df_tandes_combine['Lokasi'] == 'Tandes']
+df_tandes = df_tandes_combine[df_tandes_combine['lokasi'] == 'Tandes']
 
 # Konversi kolom tanggal ke datetime dengan format yang sesuai
-df_tandes['Tanggal'] = pd.to_datetime(df_tandes['Tanggal'], format='%d-%b-%y', errors='coerce')
+df_tandes['tanggal'] = pd.to_datetime(df_tandes['tanggal'], format='%d-%b-%y', errors='coerce')
 
 # Periksa dan hapus nilai dengan tanggal tidak valid
-if df_tandes['Tanggal'].isnull().any():
-    print("Menghapus baris dengan tanggal tidak valid...")
-    df_tandes = df_tandes.dropna(subset=['Tanggal'])
+if df_tandes['tanggal'].isnull().any():
+    df_tandes = df_tandes.dropna(subset=['tanggal'])
 
 # Hapus kolom yang tidak diperlukan pada data latih
-df_tandes = df_tandes.drop(columns=['Lokasi'], errors='ignore')
+df_tandes = df_tandes.drop(columns=['lokasi'], errors='ignore')
 
-# Pilih variabel independen dan target
-X = df_tandes[['PM10', 'PM2.5', 'SO2', 'CO', 'O3', 'NO2', 'HC']]
-y = df_tandes['Kategori']
+# Periksa keberadaan kolom 'Kategori'
+# if 'kategori' in df_tandes.columns:
+#     # Pilih variabel independen dan target
+#     X = df_tandes[['PM10', 'PM2_5', 'SO2', 'CO', 'O3', 'NO2', 'HC']]
+#     y = df_tandes['kategori']
+# else:
+#     print("Kolom 'kategori' gaada.")
+#     raise KeyError("Kolom 'kategori' diperlukan untuk lanjut brow")
 
 # Membagi data menjadi data latih dan data uji
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=42)
@@ -275,7 +295,7 @@ knn = KNeighborsClassifier(n_neighbors=4)
 knn.fit(X_train, y_train)
 
 # Ambil tanggal terakhir dari data Tandes secara otomatis
-last_date = df_tandes['Tanggal'].max()
+last_date = df_tandes['tanggal'].max()
 start_date = last_date + timedelta(days=1)
 lokasi = 'Tandes'
 
@@ -292,7 +312,7 @@ for i in range(30):
     # Buat data baru berdasarkan nilai terakhir
     new_row = {
         'PM10': np.random.normal(last_row['PM10'], 10),
-        'PM2.5': np.random.normal(last_row['PM2.5'], 5),
+        'PM2_5': np.random.normal(last_row['PM2_5'], 5),
         'SO2': np.random.normal(last_row['SO2'], 2),
         'CO': np.random.normal(last_row['CO'], 2),
         'O3': np.random.normal(last_row['O3'], 3),
@@ -312,10 +332,10 @@ predictions = knn.predict(X_future_scaled)
 
 # Buat DataFrame hasil prediksi
 df_predicted = pd.DataFrame({
-    'Lokasi': lokasi,
-    'Tanggal': [(start_date + timedelta(days=i)).strftime('%d-%b-%y') for i in range(30)],
+    'lokasi': lokasi,
+    'tanggal': [(start_date + timedelta(days=i)).strftime('%d-%b-%y') for i in range(30)],
     'PM10': df_future['PM10'],
-    'PM2.5': df_future['PM2.5'],
+    'PM2_5': df_future['PM2_5'],
     'SO2': df_future['SO2'],
     'CO': df_future['CO'],
     'O3': df_future['O3'],
@@ -326,6 +346,7 @@ df_predicted = pd.DataFrame({
 
 # Tampilkan hasil prediksi
 df_predicted.head()
+
 
 """### **Classification report data prediksi**"""
 
@@ -346,18 +367,18 @@ print(f"Accuracy Prediksi data udara : {accuracy:.2f}%")
 # Mengatur ukuran grafik
 plt.figure(figsize=(12, 6))
 
-# Membuat line chart untuk PM10, PM2.5, SO2, CO, O3, NO2, HC
-plt.plot(df_predicted['Tanggal'], df_predicted['PM10'], label='PM10', marker='o')
-plt.plot(df_predicted['Tanggal'], df_predicted['PM2.5'], label='PM2.5', marker='o')
-plt.plot(df_predicted['Tanggal'], df_predicted['SO2'], label='SO2', marker='o')
-plt.plot(df_predicted['Tanggal'], df_predicted['CO'], label='CO', marker='o')
-plt.plot(df_predicted['Tanggal'], df_predicted['O3'], label='O3', marker='o')
-plt.plot(df_predicted['Tanggal'], df_predicted['NO2'], label='NO2', marker='o')
-plt.plot(df_predicted['Tanggal'], df_predicted['HC'], label='HC', marker='o')
+# Membuat line chart untuk PM10, PM2_5, SO2, CO, O3, NO2, HC
+plt.plot(df_predicted['tanggal'], df_predicted['PM10'], label='PM10', marker='o')
+plt.plot(df_predicted['tanggal'], df_predicted['PM2_5'], label='PM2_5', marker='o')
+plt.plot(df_predicted['tanggal'], df_predicted['SO2'], label='SO2', marker='o')
+plt.plot(df_predicted['tanggal'], df_predicted['CO'], label='CO', marker='o')
+plt.plot(df_predicted['tanggal'], df_predicted['O3'], label='O3', marker='o')
+plt.plot(df_predicted['tanggal'], df_predicted['NO2'], label='NO2', marker='o')
+plt.plot(df_predicted['tanggal'], df_predicted['HC'], label='HC', marker='o')
 
 # Menambahkan judul dan label
-plt.title('Prediksi Kualitas Udara Selama 30 Hari')
-plt.xlabel('Tanggal')
+plt.title('Prediksi Kualitas Udara Tandes Selama 30 Hari')
+plt.xlabel('tanggal')
 plt.ylabel('Nilai ISPU)')
 plt.xticks(rotation=45)
 plt.grid()
@@ -380,7 +401,7 @@ index = range(len(df_predicted))
 
 # Membuat bar chart untuk setiap parameter
 plt.bar(index, df_predicted['PM10'], bar_width, label='PM10')
-plt.bar([i + bar_width for i in index], df_predicted['PM2.5'], bar_width, label='PM2.5')
+plt.bar([i + bar_width for i in index], df_predicted['PM2_5'], bar_width, label='PM2_5')
 plt.bar([i + 2 * bar_width for i in index], df_predicted['SO2'], bar_width, label='SO2')
 plt.bar([i + 3 * bar_width for i in index], df_predicted['CO'], bar_width, label='CO')
 plt.bar([i + 4 * bar_width for i in index], df_predicted['O3'], bar_width, label='O3')
@@ -388,10 +409,10 @@ plt.bar([i + 5 * bar_width for i in index], df_predicted['NO2'], bar_width, labe
 plt.bar([i + 6 * bar_width for i in index], df_predicted['HC'], bar_width, label='HC')
 
 # Menambahkan judul dan label
-plt.title('Prediksi Kualitas Udara Selama 30 Hari')
+# plt.title('Prediksi Kualitas Udara Selama 30 Hari')
 plt.xlabel('Tanggal')
 plt.ylabel('Nilai ISPU)')
-plt.xticks([i + 3 * bar_width for i in index], df_predicted['Tanggal'], rotation=45)
+plt.xticks([i + 3 * bar_width for i in index], df_predicted['tanggal'], rotation=45)
 
 # Menempatkan legenda di luar grafik
 plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
@@ -404,7 +425,7 @@ plt.show()
 """### **Pie Chart**"""
 
 # Menghitung rata-rata untuk setiap parameter
-average_values = df_predicted[['PM10', 'PM2.5', 'SO2', 'CO', 'O3', 'NO2', 'HC']].mean()
+average_values = df_predicted[['PM10', 'PM2_5', 'SO2', 'CO', 'O3', 'NO2', 'HC']].mean()
 
 # Pastikan tidak ada nilai negatif atau NaN
 average_values = average_values[average_values >= 0].dropna()
@@ -416,30 +437,42 @@ plt.figure(figsize=(6, 6))
 wedges, texts, autotexts = plt.pie(average_values, autopct='%1.1f%%', startangle=140)
 
 # Menambahkan judul
-plt.title('Distribusi Parameter yang Mempengaruhi \n Kualitas Udara Selama 30 Hari')
+# plt.title('Distribusi Parameter yang Mempengaruhi \n Kualitas Udara Selama 30 Hari')
 
 # Menambahkan legenda
-plt.legend(wedges, average_values.index, title="Kualitas Udara", loc='upper left', bbox_to_anchor=(1, 1))
+plt.legend(wedges, average_values.index, title="Kualitas Udara", loc='lower left', bbox_to_anchor=(1, 1))
 
 # Menampilkan grafik
 plt.axis('equal')
 plt.tight_layout()
-plt.show()
+save_path = 'C:/laragon/www/WEBDATA-DLH/public/img/distribusi_param_spkua_piechart.png'
+plt.savefig(save_path, dpi=300, bbox_inches='tight')
+# plt.show()
 
 """# **Insight dan rekomendasi Kebijakan pada Data AIR**"""
 
-url='https://drive.google.com/file/d/1EFeV1sQ0ZWDYLfzcejBUrmIxSiD0Rm8Y/view?usp=sharing'
-url='https://drive.google.com/uc?id=' + url.split('/')[-2]
-df2 = pd.read_csv(url)
+# url='https://drive.google.com/file/d/1EFeV1sQ0ZWDYLfzcejBUrmIxSiD0Rm8Y/view?usp=sharing'
+# url='https://drive.google.com/uc?id=' + url.split('/')[-2]
+# df2 = pd.read_csv(url)
+connection = pymysql.connect(**db_config)
 
+# Membaca data dari tabel `data_klhks`
+query = "SELECT * FROM uji_air_internals"
+df2 = pd.read_sql(query, connection)
 df2.head()
-
-df2.describe()
+# print("INI DEEF")
+# print(df2.columns)
 
 """### **Proses Perhitungan Baku Mutu**"""
 
+df2.info()
+
 # Hapus kolom yang tidak berguna
 df2 = df2.drop(columns=['Kordinat'], errors='ignore')
+
+# Tambahkan kolom Tahun dan Bulan dari kolom Tanggal
+df2['tahun'] = pd.to_datetime(df2['tanggal']).dt.year
+df2['bulan'] = pd.to_datetime(df2['tanggal']).dt.month
 
 # Parameter baku mutu Air Badan Air berdasarkan kelas
 baku_mutu = {
@@ -451,15 +484,15 @@ baku_mutu = {
 
 # Fungsi untuk mengevaluasi kategori kualitas air
 def evaluate_quality(row):
-    kelas = row['Kelas']
+    kelas = row['kelas']
     batas = baku_mutu.get(kelas, {})
     if (row['pH'] < batas['pH_min'] or row['pH'] > batas['pH_max'] or
         row['DO'] < batas['DO_min'] or
         row['BOD'] > batas['BOD_max'] or
         row['COD'] > batas['COD_max'] or
         row['TSS'] > batas['TSS_max'] or
-        row['Nitrat'] > batas['Nitrat_max'] or
-        row['Fosfat'] > batas['Fosfat_max']):
+        row['nitrat'] > batas['Nitrat_max'] or
+        row['fosfat'] > batas['Fosfat_max']):
         return 'Berbahaya'
     return 'Baik'
 
@@ -470,21 +503,17 @@ df2['Kualitas_Air'] = df2.apply(evaluate_quality, axis=1)
 df2.columns = df2.columns.str.strip()
 
 # Hitung jumlah untuk kategori 'Baik' dan 'Berbahaya' berdasarkan bulan dan tahun
-df2['Tahun'] = pd.to_datetime(df2['Tahun'], format='%Y').dt.year
-df2['Bulan'] = df2['Bulan'].astype(str)  # Pastikan bulan dalam format string
-
-# Hitung jumlah untuk masing-masing tahun
-jumlah_2023 = df2[df2['Tahun'] == 2023].groupby('Bulan')['Kualitas_Air'].value_counts().unstack(fill_value=0)
-jumlah_2024 = df2[df2['Tahun'] == 2024].groupby('Bulan')['Kualitas_Air'].value_counts().unstack(fill_value=0)
+jumlah_2023 = df2[df2['tahun'] == 2023].groupby('bulan')['Kualitas_Air'].value_counts().unstack(fill_value=0)
+jumlah_2024 = df2[df2['tahun'] == 2024].groupby('bulan')['Kualitas_Air'].value_counts().unstack(fill_value=0)
 
 """### **Line chart air 2023 dan 2024**"""
 
-# Pastikan 'Bulan' adalah integer untuk sorting
-df2['Bulan'] = df2['Bulan'].astype(int)
+# Pastikan 'bulan' adalah integer untuk sorting
+df2['bulan'] = pd.to_datetime(df2['tanggal']).dt.month.astype(int)
 
 # Hitung jumlah untuk masing-masing tahun dan urutkan berdasarkan Bulan
-jumlah_2023 = df2[df2['Tahun'] == 2023].groupby('Bulan')['Kualitas_Air'].value_counts().unstack(fill_value=0).sort_index()
-jumlah_2024 = df2[df2['Tahun'] == 2024].groupby('Bulan')['Kualitas_Air'].value_counts().unstack(fill_value=0).sort_index()
+jumlah_2023 = df2[df2['tahun'] == 2023].groupby('bulan')['Kualitas_Air'].value_counts().unstack(fill_value=0).sort_index()
+jumlah_2024 = df2[df2['tahun'] == 2024].groupby('bulan')['Kualitas_Air'].value_counts().unstack(fill_value=0).sort_index()
 
 # Visualisasi line chart untuk bulan dengan kualitas air baik dan berbahaya
 plt.figure(figsize=(15, 5))
@@ -510,9 +539,11 @@ plt.ylabel("Jumlah")
 plt.xticks(jumlah_2024.index, labels=jumlah_2024.index.astype(str), rotation=45)
 plt.grid()
 plt.legend(loc='upper right', bbox_to_anchor=(1.50, 1))
-
 plt.tight_layout()
-plt.show()
+
+save_path = 'C:/laragon/www/WEBDATA-DLH/public/img/water_quality_by_year.png'
+plt.savefig(save_path, dpi=300, bbox_inches='tight')
+# plt.show()
 
 # Hitung total untuk kategori 'Memenuhi Baku Mutu' dan 'Melebihi Baku Mutu' tahun 2023
 total_melebihi_2023 = jumlah_2023['Berbahaya'].sum()
@@ -549,6 +580,8 @@ axes[1].legend(labels_2024, loc='lower left', title='Kualitas Air')
 
 # Menampilkan grafik
 plt.tight_layout()
+save_path = 'C:/laragon/www/WEBDATA-DLH/public/img/water_quality_distribution.png'
+plt.savefig(save_path, dpi=300, bbox_inches='tight')
 plt.show()
 
 # Fungsi untuk memberikan solusi berdasarkan parameter yang melebihi baku mutu
@@ -556,19 +589,19 @@ def check_exceedances_per_month(df):
     solusi_list = []
 
     # Kelompokkan data berdasarkan bulan dan tahun
-    grouped = df.groupby(['Tahun', 'Bulan'])
+    grouped = df.groupby(['tahun', 'bulan'])
 
     for (tahun, bulan), group in grouped:
         max_exceedance = {
             'parameter': None,
             'value': -1,
             'kelas': None,
-            'lokasi': None  # Tambahkan lokasi
+            'nama_lokasi': None  # Tambahkan lokasi
         }
 
         for index, row in group.iterrows():
-            kelas = row['Kelas']
-            lokasi = row['Lokasi']
+            kelas = row['kelas']
+            lokasi = row['nama_lokasi']
             batas = baku_mutu.get(kelas, {})
             current_exceedance = {}
 
@@ -588,12 +621,12 @@ def check_exceedances_per_month(df):
             if row['TSS'] > batas.get('TSS_max', float('inf')):
                 exceed_value = row['TSS'] - batas['TSS_max']
                 current_exceedance['TSS'] = exceed_value
-            if row['Nitrat'] > batas.get('Nitrat_max', float('inf')):
-                exceed_value = row['Nitrat'] - batas['Nitrat_max']
-                current_exceedance['Nitrat'] = exceed_value
-            if row['Fosfat'] > batas.get('Fosfat_max', float('inf')):
-                exceed_value = row['Fosfat'] - batas['Fosfat_max']
-                current_exceedance['Fosfat'] = exceed_value
+            if row['nitrat'] > batas.get('Nitrat_max', float('inf')):
+                exceed_value = row['nitrat'] - batas['Nitrat_max']
+                current_exceedance['nitrat'] = exceed_value
+            if row['fosfat'] > batas.get('Fosfat_max', float('inf')):
+                exceed_value = row['fosfat'] - batas['Fosfat_max']
+                current_exceedance['fosfat'] = exceed_value
 
             # Cek parameter yang melebihi batas maksimum
             for param, exceed_value in current_exceedance.items():
@@ -601,11 +634,11 @@ def check_exceedances_per_month(df):
                     max_exceedance['parameter'] = param
                     max_exceedance['value'] = exceed_value
                     max_exceedance['kelas'] = kelas
-                    max_exceedance['lokasi'] = lokasi  # Simpan lokasi
+                    max_exceedance['nama_lokasi'] = lokasi  # Simpan lokasi
 
         # Jika ada parameter yang melebihi baku mutu
         if max_exceedance['parameter']:
-            solusi = (f"Sungai kelas {max_exceedance['kelas']} di {max_exceedance['lokasi']} tahun {tahun} bulan {bulan}: "
+            solusi = (f"Sungai kelas {max_exceedance['kelas']} di {max_exceedance['nama_lokasi']} tahun {tahun} bulan {bulan}: "
                       f"Parameter {max_exceedance['parameter']} melebihi baku mutu sebesar "
                       f"{max_exceedance['value']:.2f}. "
                       "Perlu tindakan untuk menurunkan status air.")
@@ -619,42 +652,83 @@ solusi_output = check_exceedances_per_month(df2)
 # Tampilkan solusi dengan format yang lebih rapi
 print("\n".join(solusi_output))
 
-# Korelasi antar variabel numerik
-numeric_cols = df2.select_dtypes(include=[np.number])
-corr_matrix = numeric_cols.corr()
-plt.figure(figsize=(8, 6))
-sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', fmt=".2f")
-plt.title("Korelasi Antar Variabel")
-plt.show()
-
 """# **Prediksi dan Insight pada data Udara DLH kebonsari dan Wonorejo**"""
 
-# Mengambil data dari data ISPU
-df3 = df
+# url='https://drive.google.com/file/d/1dy5sq46ELXtIppaVc6qQrKPHvhpc-hbO/view?usp=sharing'
+# url='https://drive.google.com/uc?id=' + url.split('/')[-2]
+# data = pd.read_csv(url)
+# Membuka koneksi ke database
+connection = pymysql.connect(**db_config)
+
+# Membaca data dari tabel `data_spkuas`
+query = "SELECT * FROM data_spkuas"
+data = pd.read_sql(query, connection)
+
+# Menutup koneksi setelah membaca data
+# connection.close()
 
 """### **Preprocessing data**"""
 
-df3.head()
+# Tabel baku mutu ISPU
+baku_mutu = {
+    "PM10": [(0, 50, 50), (50, 150, 100), (150, 350, 200), (350, 420, 300), (420, 500, 400)],
+    "PM2_5": [(0, 15.5, 50), (15.5, 55.4, 100), (55.4, 150.4, 200), (150.4, 250.4, 300), (250.4, float('inf'), 400)],
+    "SO2": [(0, 52, 50), (52, 180, 100), (180, 400, 200), (400, 800, 300), (800, 1200, 400)],
+    "CO": [(0, 4000, 50), (4000, 8000, 100), (8000, 15000, 200), (15000, 30000, 300), (30000, 45000, 400)],
+    "O3": [(0, 120, 50), (120, 235, 100), (235, 400, 200), (400, 800, 300), (800, 1000, 400)],
+    "NO2": [(0, 80, 50), (80, 200, 100), (200, 400, 200), (400, 800, 300), (800, 1000, 400)],
+    "HC": [(0, 45, 50), (45, 100, 100), (100, 215, 200), (215, 432, 300), (432, 648, 400)]
+}
 
-# Menampilkan semua nilai unik di kolom 'Lokasi'
-print(df3['Lokasi'].unique())
+def calculate_ispu(value, pollutant):
+    for lower_bound, upper_bound, ispu_value in baku_mutu[pollutant]:
+        if lower_bound <= value < upper_bound:
+            xx = value
+            ia = ispu_value
+            ib = ispu_value - 50  # ISPU untuk batas bawah
+            xa = upper_bound
+            xb = lower_bound
+
+            ispu = (ia - ib) / (xa - xb) * (xx - xb) + ib
+            return round(ispu, 1)
+    return None
+
+# Menggunakan DataFrame "data" yang sudah ada
+df3 = pd.DataFrame()
+
+# Menambahkan kolom lokasi dan tanggal dari "data"
+df3['lokasi'] = data['lokasi']
+df3['longitude'] = data['longitude']
+df3['latitude'] = data['latitude']
+df3['tanggal'] = data['tanggal']
+df3['kategori'] = data['kategori']
+
+# Mengisi nilai kosong dengan nilai 0
+data = data.fillna(0)
+
+# Menghitung ISPU dan menambahkannya ke df3
+df3['PM10'] = data['PM10'].apply(lambda x: calculate_ispu(x, 'PM10'))
+df3['PM2_5'] = data['PM2_5'].apply(lambda x: calculate_ispu(x, 'PM2_5'))
+df3['SO2'] = data['SO2'].apply(lambda x: calculate_ispu(x, 'SO2'))
+df3['CO'] = data['CO'].apply(lambda x: calculate_ispu(x, 'CO'))
+df3['O3'] = data['O3'].apply(lambda x: calculate_ispu(x, 'O3'))
+df3['NO2'] = data['NO2'].apply(lambda x: calculate_ispu(x, 'NO2'))
+df3['HC'] = data['HC'].apply(lambda x: calculate_ispu(x, 'HC'))
+
+# Menampilkan DataFrame df3
+df3
 
 # Filter data untuk lokasi 'Wonorejo' dan 'Kebonsari'
-df3_filtered = df3[df3['Lokasi'].isin(['Wonorejo', 'Kebonsari'])]
+df3_filtered = df3[df3['lokasi'].isin(['Wonorejo', 'Kebonsari'])]
 
-# Menghapus kolom 'PM2.5', 'CO', 'HC', 'X', dan 'Y'
-df3_filtered = df3_filtered.drop(columns=['PM2.5', 'CO', 'HC', 'X', 'Y'], errors='ignore')
+# Menghapus kolom 'PM2_5', 'CO', 'HC', 'longitude', dan 'latitude'
+df3_filtered = df3_filtered.drop(columns=['PM2_5', 'CO', 'HC', 'longitude', 'latitude'], errors='ignore')
 
 # Menampilkan hasil akhir
 print("Data setelah filtrasi untuk 'Wonorejo' dan 'Kebonsari':")
 df3_filtered
 
-# Menampilkan semua nilai unik di kolom 'Lokasi'
-print(df3_filtered['Lokasi'].unique())
-
-df3_filtered.tail()
-
-"""### **Menambahkan kolom Kategori**"""
+"""### **Menambahkan kolom kategori**"""
 
 # Fungsi untuk menentukan kategori berdasarkan nilai maksimum
 def classify_category(row):
@@ -671,13 +745,13 @@ def classify_category(row):
         return 'berbahaya'
 
 # Tambahkan kolom kategori ke df3_filtered
-df3_filtered['Kategori'] = df3_filtered.apply(classify_category, axis=1)
+df3_filtered['kategori'] = df3_filtered.apply(classify_category, axis=1)
 
 # Simpan hasil ke DataFrame baru
 df3_kategori = df3_filtered.copy()
 
 # Tampilkan hasil DataFrame baru
-df3_kategori.tail()
+df3_kategori.head()
 
 """## **Prediksi udara Kebonsari dan Wonorejo**"""
 
@@ -685,7 +759,7 @@ df3_kategori = df3_kategori.copy()
 
 # Pilih variabel independen dan target
 X = df3_kategori[['PM10', 'SO2', 'O3', 'NO2']]
-y = df3_kategori['Kategori']
+y = df3_kategori['kategori']
 
 # Membagi data menjadi data latih dan data uji
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=42)
@@ -722,8 +796,8 @@ def create_predictions(location, last_date):
     predictions = knn.predict(X_future_scaled)
 
     df_predicted = pd.DataFrame({
-        'Lokasi': location,
-        'Tanggal': [(start_date + timedelta(days=i)).strftime('%d-%b-%y') for i in range(30)],
+        'lokasi': location,
+        'tanggal': [(start_date + timedelta(days=i)).strftime('%d-%b-%y') for i in range(30)],
         'PM10': df_future['PM10'],
         'SO2': df_future['SO2'],
         'O3': df_future['O3'],
@@ -746,7 +820,7 @@ df3_kategori = df3_kategori.copy()
 
 # Pilih variabel independen dan target
 X = df3_kategori[['PM10', 'SO2', 'O3', 'NO2']]
-y = df3_kategori['Kategori']
+y = df3_kategori['kategori']
 
 # Membagi data menjadi data latih dan data uji
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=42)
@@ -763,7 +837,7 @@ knn.fit(X_train, y_train)
 
 # Fungsi untuk membuat prediksi berdasarkan lokasi
 def create_predictions(location):
-    last_date = pd.to_datetime(df3_kategori['Tanggal'].max(), format='%d-%b-%y')
+    last_date = pd.to_datetime(df3_kategori['tanggal'].max(), format='%d-%b-%y')
     start_date = last_date + timedelta(days=1)
     predictions_list = []
 
@@ -784,8 +858,8 @@ def create_predictions(location):
     predictions = knn.predict(X_future_scaled)
 
     df_predicted = pd.DataFrame({
-        'Lokasi': location,
-        'Tanggal': [(start_date + timedelta(days=i)).strftime('%d-%b-%y') for i in range(30)],
+        'lokasi': location,
+        'tanggal': [(start_date + timedelta(days=i)).strftime('%d-%b-%y') for i in range(30)],
         'PM10': df_future['PM10'],
         'SO2': df_future['SO2'],
         'O3': df_future['O3'],
@@ -833,20 +907,20 @@ print(classification_report(y_test, knn.predict(X_test), zero_division=0))
 print("\nClassification Report untuk Kebonsari:")
 print(classification_report(y_test, knn.predict(X_test), zero_division=0))
 
-"""### **Visualisasi Line chart Data Wonorejo**"""
+"""### **Visualisasi Line chart Prediksi udara Wonorejo**"""
 
 # Mengatur ukuran grafik
 plt.figure(figsize=(12, 6))
 
 # Membuat line chart untuk PM10, SO2, O3, dan NO2
-plt.plot(df_predicted_Wonorejo['Tanggal'], df_predicted_Wonorejo['PM10'], label='PM10', marker='o')
-plt.plot(df_predicted_Wonorejo['Tanggal'], df_predicted_Wonorejo['SO2'], label='SO2', marker='o')
-plt.plot(df_predicted_Wonorejo['Tanggal'], df_predicted_Wonorejo['O3'], label='O3', marker='o')
-plt.plot(df_predicted_Wonorejo['Tanggal'], df_predicted_Wonorejo['NO2'], label='NO2', marker='o')
+plt.plot(df_predicted_Wonorejo['tanggal'], df_predicted_Wonorejo['PM10'], label='PM10', marker='o')
+plt.plot(df_predicted_Wonorejo['tanggal'], df_predicted_Wonorejo['SO2'], label='SO2', marker='o')
+plt.plot(df_predicted_Wonorejo['tanggal'], df_predicted_Wonorejo['O3'], label='O3', marker='o')
+plt.plot(df_predicted_Wonorejo['tanggal'], df_predicted_Wonorejo['NO2'], label='NO2', marker='o')
 
 # Menambahkan judul dan label
 plt.title('Prediksi Kualitas Udara di Wonorejo Selama 30 Hari')
-plt.xlabel('Tanggal')
+plt.xlabel('tanggal')
 plt.ylabel('Nilai ISPU)')
 plt.xticks(rotation=45)
 plt.grid()
@@ -854,24 +928,25 @@ plt.tight_layout()
 
 # Menempatkan legenda di luar grafik
 plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
-
+save_path = 'C:/laragon/www/WEBDATA-DLH/public/img/linechart_wonorejo.png'
+plt.savefig(save_path, dpi=300, bbox_inches='tight')
 # Menampilkan grafik
-plt.show()
+# plt.show()
 
-"""### **Visualisasi Line Chart Kebonsari**"""
+"""### **Visualisasi Line Chart Prediksi Udara Kebonsari**"""
 
 # Mengatur ukuran grafik
 plt.figure(figsize=(12, 6))
 
 # Membuat line chart untuk PM10, SO2, O3, dan NO2
-plt.plot(df_predicted_Kebonsari['Tanggal'], df_predicted_Kebonsari['PM10'], label='PM10', marker='o')
-plt.plot(df_predicted_Kebonsari['Tanggal'], df_predicted_Kebonsari['SO2'], label='SO2', marker='o')
-plt.plot(df_predicted_Kebonsari['Tanggal'], df_predicted_Kebonsari['O3'], label='O3', marker='o')
-plt.plot(df_predicted_Kebonsari['Tanggal'], df_predicted_Kebonsari['NO2'], label='NO2', marker='o')
+plt.plot(df_predicted_Kebonsari['tanggal'], df_predicted_Kebonsari['PM10'], label='PM10', marker='o')
+plt.plot(df_predicted_Kebonsari['tanggal'], df_predicted_Kebonsari['SO2'], label='SO2', marker='o')
+plt.plot(df_predicted_Kebonsari['tanggal'], df_predicted_Kebonsari['O3'], label='O3', marker='o')
+plt.plot(df_predicted_Kebonsari['tanggal'], df_predicted_Kebonsari['NO2'], label='NO2', marker='o')
 
 # Menambahkan judul dan label
 plt.title('Prediksi Kualitas Udara di Kebonsari Selama 30 Hari')
-plt.xlabel('Tanggal')
+plt.xlabel('tanggal')
 plt.ylabel('Nilai ISPU)')
 plt.xticks(rotation=45)
 plt.grid()
@@ -880,6 +955,8 @@ plt.tight_layout()
 # Menempatkan legenda di luar grafik
 plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
 
+save_path = 'C:/laragon/www/WEBDATA-DLH/public/img/linechart_kebonsari.png'
+plt.savefig(save_path, dpi=300, bbox_inches='tight')
 # Menampilkan grafik
 plt.show()
 
@@ -919,53 +996,39 @@ axs[1].legend(labels, title='Polutan', loc='lower right', bbox_to_anchor=(1, 0),
 plt.tight_layout()
 plt.show()
 
-"""## **Data udara 2019 - 2024**"""
+"""## **Insight Data udara 2019 - 2024**"""
 
-# Menghitung jumlah data untuk setiap lokasi
-location_counts = df3_filtered['Lokasi'].value_counts()
-
-# Membuat Bar Chart
-plt.figure(figsize=(6, 5))
-location_counts.plot(kind='bar', color=['skyblue', 'salmon'])
-plt.title('Jumlah Data per Lokasi')
-plt.xlabel('Lokasi')
-plt.ylabel('Jumlah Data')
-plt.xticks(rotation=0)
-plt.grid(axis='y')
-plt.tight_layout()
-plt.show()
-
-"""### **Visualisasi Grafik bar kualitas udara 2019 - 2024**"""
-
-# Mengubah kolom 'Tanggal' menjadi datetime
-df3_filtered['Tanggal'] = pd.to_datetime(df3_filtered['Tanggal'], errors='coerce')
+# Mengubah kolom 'tanggal' menjadi datetime
+df3_filtered['tanggal'] = pd.to_datetime(df3_filtered['tanggal'], errors='coerce')
 
 # Mengelompokkan data berdasarkan tahun dan lokasi, kemudian menghitung rata-rata
-df3_filtered['Tahun'] = df3_filtered['Tanggal'].dt.year
-avg_pollutants_yearly = df3_filtered.groupby(['Tahun', 'Lokasi'])[['PM10', 'SO2', 'O3', 'NO2']].mean().reset_index()
+df3_filtered['tahun'] = df3_filtered['tanggal'].dt.year
+avg_pollutants_yearly = df3_filtered.groupby(['tahun', 'lokasi'])[['PM10', 'SO2', 'O3', 'NO2']].mean().reset_index()
 
 # Mengubah format data untuk plotting
-avg_pollutants_pivot = avg_pollutants_yearly.pivot(index='Tahun', columns='Lokasi', values=['PM10', 'SO2', 'O3', 'NO2'])
+avg_pollutants_pivot = avg_pollutants_yearly.pivot(index='tahun', columns='lokasi', values=['PM10', 'SO2', 'O3', 'NO2'])
 
 # Membuat Bar Chart
 plt.figure(figsize=(12, 8))
 avg_pollutants_pivot.plot(kind='bar', figsize=(10, 8))
-plt.title('Rata-rata Kualitas Udara Tahunan di Wonorejo dan Kebonsari (2019-2024)')
-plt.xlabel('Tahun')
+plt.title('Rata-rata Kualitas Udara tahunan di Wonorejo dan Kebonsari (2019-2024)')
+plt.xlabel('tahun')
 plt.ylabel('Nilai ISPU')
 plt.xticks(rotation=0)
 plt.grid(axis='y')
 plt.tight_layout()
 plt.legend(title='Polutan', bbox_to_anchor=(1.05, 1), loc='upper left')
-plt.show()
+save_path = 'C:/laragon/www/WEBDATA-DLH/public/img/air_quality_average_WonKeb.png'
+plt.savefig(save_path, dpi=300, bbox_inches='tight')
+# plt.show()
 
 """### **Visualisasi Grafik Piechart kualitas udara 2019 - 2024**"""
 
 # Menghapus spasi di sekitar nama lokasi (jika belum dilakukan)
-df3_filtered['Lokasi'] = df3_filtered['Lokasi'].str.strip()
+df3_filtered['lokasi'] = df3_filtered['lokasi'].str.strip()
 
 # Menghitung rata-rata untuk setiap polutan berdasarkan lokasi
-avg_pollutants = df3_filtered.groupby('Lokasi')[['PM10', 'SO2', 'O3', 'NO2']].mean()
+avg_pollutants = df3_filtered.groupby('lokasi')[['PM10', 'SO2', 'O3', 'NO2']].mean()
 
 # Membuat subplots untuk Pie Charts
 fig, axs = plt.subplots(1, 2, figsize=(10, 6))
@@ -973,56 +1036,118 @@ fig, axs = plt.subplots(1, 2, figsize=(10, 6))
 # Pie Chart untuk Kebonsari
 axs[0].pie(avg_pollutants.loc['Kebonsari'], autopct='%1.1f%%', startangle=90)
 axs[0].axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
-axs[0].set_title('Distribusi Parameter yang Mempengaruhi \n Kualitas Udara Kebonsari')
+axs[0].set_title('Kebonsari')
 axs[0].legend(avg_pollutants.columns, title='Polutan', loc='lower right', bbox_to_anchor=(1, 0), frameon=False)
 
 # Pie Chart untuk Wonorejo
 axs[1].pie(avg_pollutants.loc['Wonorejo'], autopct='%1.1f%%', startangle=90)
 axs[1].axis('equal')
-axs[1].set_title('Distribusi Parameter yang Mempengaruhi \n Kualitas Udara Wonorejo')
+axs[1].set_title('Wonorejo')
 axs[1].legend(avg_pollutants.columns, title='Polutan', loc='lower right', bbox_to_anchor=(1, 0), frameon=False)
 
-plt.tight_layout()
-plt.show()
+# Menyimpan kedua pie chart dalam satu file
+save_path = 'C:/laragon/www/WEBDATA-DLH/public/img/distribusi_param_kedua_lokasi.png'
+fig.savefig(save_path, dpi=300, bbox_inches='tight')
+
+plt.close(fig)
+# plt.tight_layout()
+# plt.show()
 
 """### **Grafik line chart Tren kualitas udara Kebonsari dan Wonorejo**"""
 
 # Memfilter data untuk lokasi 'Wonorejo' dan 'Kebonsari'
-filtered_data = df3_filtered[df3_filtered['Lokasi'].isin(['Wonorejo', 'Kebonsari'])]
+filtered_data = df3_filtered[df3_filtered['lokasi'].isin(['Wonorejo', 'Kebonsari'])]
 
-# Mengubah kolom 'Tanggal' menjadi datetime dengan inferensi format
-filtered_data['Tanggal'] = pd.to_datetime(filtered_data['Tanggal'], errors='coerce')
+# Mengubah kolom 'tanggal' menjadi datetime dengan inferensi format
+filtered_data['tanggal'] = pd.to_datetime(filtered_data['tanggal'], errors='coerce')
 
 # Menghapus baris dengan nilai NaN di kolom yang ingin dihitung rata-ratanya
 filtered_data = filtered_data.dropna(subset=['PM10', 'SO2', 'O3', 'NO2'])
 
 # Mengelompokkan data berdasarkan tanggal dan lokasi, kemudian menghitung rata-rata
-daily_avg = filtered_data.groupby(['Tanggal', 'Lokasi'])[['PM10', 'SO2', 'O3', 'NO2']].mean().reset_index()
+daily_avg = filtered_data.groupby(['tanggal', 'lokasi'])[['PM10', 'SO2', 'O3', 'NO2']].mean().reset_index()
+
+# Fungsi untuk mendapatkan rentang tanggal dari input
+def get_date_range():
+    tahun_awal = int(input("tahun Awal: "))
+    bulan_awal = input("bulan Awal (misal: januari, februari, ...): ").lower()
+    tanggal_awal = int(input("Tanggal Awal: "))
+
+    tahun_akhir = int(input("tahun Akhir: "))
+    bulan_akhir = input("bulan Akhir (misal: januari, februari, ...): ").lower()
+    tanggal_akhir = int(input("Tanggal Akhir: "))
+
+    # Mengubah nama bulan menjadi angka
+    bulan_mapping = {
+        'januari': 1, 'februari': 2, 'maret': 3, 'april': 4,
+        'mei': 5, 'juni': 6, 'juli': 7, 'agustus': 8,
+        'september': 9, 'oktober': 10, 'november': 11, 'desember': 12
+    }
+
+    start_date = pd.Timestamp(year=tahun_awal, month=bulan_mapping[bulan_awal], day=tanggal_awal)
+    end_date = pd.Timestamp(year=tahun_akhir, month=bulan_mapping[bulan_akhir], day=tanggal_akhir)
+
+    return start_date, end_date
+
+# Mendapatkan rentang tanggal dari input user
+start_date, end_date = get_date_range()
 
 # Membuat Line Chart untuk Kebonsari
 plt.figure(figsize=(12, 6))
-kebonsari_data = daily_avg[daily_avg['Lokasi'] == 'Kebonsari']
-plt.plot(kebonsari_data['Tanggal'], kebonsari_data['PM10'], label='PM10', color='blue')
-plt.plot(kebonsari_data['Tanggal'], kebonsari_data['SO2'], label='SO2', color='orange')
-plt.plot(kebonsari_data['Tanggal'], kebonsari_data['O3'], label='O3', color='green')
-plt.plot(kebonsari_data['Tanggal'], kebonsari_data['NO2'], label='NO2', color='red')
+kebonsari_data = daily_avg[(daily_avg['lokasi'] == 'Kebonsari') &
+                            (daily_avg['tanggal'] >= start_date) &
+                            (daily_avg['tanggal'] <= end_date)]
+
+plt.plot(kebonsari_data['tanggal'], kebonsari_data['PM10'], label='PM10', color='blue')
+plt.plot(kebonsari_data['tanggal'], kebonsari_data['SO2'], label='SO2', color='orange')
+plt.plot(kebonsari_data['tanggal'], kebonsari_data['O3'], label='O3', color='green')
+plt.plot(kebonsari_data['tanggal'], kebonsari_data['NO2'], label='NO2', color='red')
 plt.title('Tren Kualitas Udara di Kebonsari')
-plt.xlabel('Tanggal')
-plt.ylabel('Nilai ISPU)')
+plt.xlabel('tanggal')
+plt.ylabel('Nilai ISPU')
 plt.grid()
 plt.legend(loc='upper right', bbox_to_anchor=(1.15, 1))
 plt.tight_layout()
 plt.show()
 
+# Fungsi untuk mendapatkan rentang tanggal dari input
+def get_date_range():
+    tahun_awal = int(input("tahun Awal: "))
+    bulan_awal = input("bulan Awal (misal: januari, februari, ...): ").lower()
+    tanggal_awal = int(input("Tanggal Awal: "))
+
+    tahun_akhir = int(input("tahun Akhir: "))
+    bulan_akhir = input("bulan Akhir (misal: januari, februari, ...): ").lower()
+    tanggal_akhir = int(input("Tanggal Akhir: "))
+
+    # Mengubah nama bulan menjadi angka
+    bulan_mapping = {
+        'januari': 1, 'februari': 2, 'maret': 3, 'april': 4,
+        'mei': 5, 'juni': 6, 'juli': 7, 'agustus': 8,
+        'september': 9, 'oktober': 10, 'november': 11, 'desember': 12
+    }
+
+    start_date = pd.Timestamp(year=tahun_awal, month=bulan_mapping[bulan_awal], day=tanggal_awal)
+    end_date = pd.Timestamp(year=tahun_akhir, month=bulan_mapping[bulan_akhir], day=tanggal_akhir)
+
+    return start_date, end_date
+
+# Mendapatkan rentang tanggal dari input user
+start_date, end_date = get_date_range()
+
 # Membuat Line Chart untuk Wonorejo
 plt.figure(figsize=(12, 6))
-wonorejo_data = daily_avg[daily_avg['Lokasi'] == 'Wonorejo']  # Ganti 'Wonerejo' menjadi 'Wonorejo'
-plt.plot(wonorejo_data['Tanggal'], wonorejo_data['PM10'], label='PM10', color='blue')
-plt.plot(wonorejo_data['Tanggal'], wonorejo_data['SO2'], label='SO2', color='orange')
-plt.plot(wonorejo_data['Tanggal'], wonorejo_data['O3'], label='O3', color='green')
-plt.plot(wonorejo_data['Tanggal'], wonorejo_data['NO2'], label='NO2', color='red')
+wonorejo_data = daily_avg[(daily_avg['lokasi'] == 'Wonorejo') &
+                           (daily_avg['tanggal'] >= start_date) &
+                           (daily_avg['tanggal'] <= end_date)]
+
+plt.plot(wonorejo_data['tanggal'], wonorejo_data['PM10'], label='PM10', color='blue')
+plt.plot(wonorejo_data['tanggal'], wonorejo_data['SO2'], label='SO2', color='orange')
+plt.plot(wonorejo_data['tanggal'], wonorejo_data['O3'], label='O3', color='green')
+plt.plot(wonorejo_data['tanggal'], wonorejo_data['NO2'], label='NO2', color='red')
+
 plt.title('Tren Kualitas Udara di Wonorejo')
-plt.xlabel('Tanggal')
+plt.xlabel('tanggal')
 plt.ylabel('Nilai ISPU')
 plt.grid()
 plt.legend(loc='upper right', bbox_to_anchor=(1.15, 1))

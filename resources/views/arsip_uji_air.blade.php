@@ -78,13 +78,13 @@
                         <div class="card-header">
                             <h4 class="card-title">Arsip Data Uji Kualitas Air Internal</h4>
                             <div class="button-container">
-                                <button class="button-add" onclick="window.location.href='/form_arsip_uji_air';">
+                                <button class="button-add" onclick="window.location.href='/form_arsip_uji_air';" data-bs-toggle="tooltip" title="Form Tambah Data">
                                     <i class="bi bi-file-earmark-plus"></i>
                                 </button>
-                                <button class="button-save" data-toggle="modal" data-target="#exampleModalCenter">
+                                <button class="button-save" data-toggle="modal" data-target="#exampleModalCenter" data-bs-toggle="tooltip" title="Unggah File(.xls .xlsx)">
                                     <i class="bi bi-upload"></i>
                                 </button>
-                                <button class="button-download" data-toggle="modal" onclick="downloadTemplate('ujiairinternal')" data-target="#exampleModalCenter" data-bs-toggle="tooltip" title="Download Template Excel">
+                                <button class="button-download" data-toggle="modal" onclick="downloadTemplate('ujiairinternal')" data-target="#exampleModalCenter" data-bs-toggle="tooltip" title="Unduh Template Excel">
                                     <i class="bi bi-download"></i>
                                 </button>
                             </div>
@@ -341,7 +341,7 @@
                 <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLongTitle">Import File</h5>
+                            <h5 class="modal-title" id="exampleModalLongTitle">Upload File</h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -361,7 +361,7 @@
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
 
-                            <button type="submit" class="btn btn-primary">Import</button>
+                            <button type="submit" class="btn btn-primary">Upload</button>
                             {{-- <button type="button" class="btn btn-primary">Save changes</button> --}}
                         </div>
                     </div>

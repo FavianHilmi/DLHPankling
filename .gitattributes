@@ -9,3 +9,9 @@
 /.github export-ignore
 CHANGELOG.md export-ignore
 .styleci.yml export-ignore
+
+# Untuk file Jupyter Notebook (.ipynb)
+*.ipynb text eol=crlf
+
+# Untuk file Python (.py)
+*.py text eol=lf

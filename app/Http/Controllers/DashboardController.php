@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\DataSPKUA;  // Make sure this is the correct model for your data_spkuas table
 use Illuminate\Http\Request;
+use Symfony\Component\Process\Process;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 
 class DashboardController extends Controller
 {
@@ -41,5 +43,28 @@ class DashboardController extends Controller
 
         // Return a view with the generated chart image
         return view('dashboard', ['chartImage' => asset('air_quality_chart.png')]);
+    }
+
+    public function refreshChart(Request $request)
+    {
+        try {
+            // Path ke Python dan script Python
+            $pythonPath = '/usr/bin/python3'; // Sesuaikan dengan path Python di server
+            $scriptPath = base_path('python-scripts/new_project_data_final.py'); // Simpan script di folder 'scripts'
+
+            // Eksekusi Python Script
+            $process = new Process([$pythonPath, $scriptPath]);
+            $process->run();
+
+            // Cek apakah ada error
+            if (!$process->isSuccessful()) {
+                throw new ProcessFailedException($process);
+            }
+
+            // Jika berhasil
+            return response()->json(['success' => true, 'message' => 'Chart updated successfully!']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
     }
 }

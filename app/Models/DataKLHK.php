@@ -26,6 +26,7 @@ class DataKLHK extends Model
         'HC',
         'PM10',
         'PM2_5',
+        'kategori',
         'user_id',
         'status'
     ];

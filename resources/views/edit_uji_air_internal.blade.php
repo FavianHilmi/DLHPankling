@@ -81,14 +81,14 @@
                                                 value="{{ old('nama_lokasi', $ujiAirInternal->nama_lokasi) }}">
                                         </div>
                                     </div>
-                                    <div class="col-md-5 px-3">
+                                    {{-- <div class="col-md-5 px-3">
                                         <div class="form-group">
                                             <label for="wilayah_lokasi" class="form">Wilayah</label>
                                             <input type="text" name="wilayah_lokasi" class="form-control"
                                                 placeholder="wilayah_lokasi"
                                                 value="{{ old('wilayah_lokasi', $ujiAirInternal->wilayah_lokasi) }}">
                                         </div>
-                                    </div>
+                                    </div> --}}
 
                                 </div>
                                 <div class="row">

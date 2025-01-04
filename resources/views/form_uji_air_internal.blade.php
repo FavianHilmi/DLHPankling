@@ -37,12 +37,12 @@
                                         <input type="text" name="nama_lokasi" id="nama_lokasi" class="form-control" required>
                                     </div>
                                 </div>
-                                <div class="col-md-5 px-3">
+                                {{-- <div class="col-md-5 px-3">
                                     <div class="form-group">
                                         <label for="wilayah_lokasi" class="form">Wilayah</label>
                                         <input type="text" name="wilayah_lokasi" id="wilayah_lokasi" class="form-control" required>
                                     </div>
-                                </div>
+                                </div> --}}
 
                             </div>
                             <div class="row">

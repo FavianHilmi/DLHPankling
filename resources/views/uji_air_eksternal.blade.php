@@ -78,15 +78,13 @@
                         <div class="card-header">
                             <h4 class="card-title">Data Uji Kualitas Air Eksternal</h4>
                             <div class="button-container">
-                                <button class="button-add" onclick="window.location.href='/form_uji_air_eksternal';">
+                                <button class="button-add" onclick="window.location.href='/form_uji_air_eksternal';" data-bs-toggle="tooltip" title="Form Tambah Data">
                                     <i class="bi bi-file-earmark-plus"></i>
                                 </button>
-                                <button class="button-save" data-toggle="modal" data-target="#exampleModalCenter">
+                                <button class="button-save" data-toggle="modal" data-target="#exampleModalCenter" data-bs-toggle="tooltip" title="Unggah File(.xls .xlsx)">
                                     <i class="bi bi-upload"></i>
                                 </button>
-                                <button class="button-download" data-toggle="modal"
-                                    onclick="downloadTemplate('ujiaireksternal')" data-target="#exampleModalCenter"
-                                    data-bs-toggle="tooltip" title="Download Template Excel">
+                                <button class="button-download" onclick="window.location.href='{{ asset('storage/templates/data_air_eksternal_entry_form.xlsx') }}';" data-bs-toggle="tooltip" title="Unduh Template Excel">
                                     <i class="bi bi-download"></i>
                                 </button>
                             </div>
@@ -131,7 +129,7 @@
                                         <label for="nama_lokasi" class="form-label"
                                             style="font-size: 12pt">Lokasi</label>
                                         <input name="nama_lokasi" type="text" id="nama_lokasi" class="form-control"
-                                            style="font-size: 12pt" placeholder="nama_Lokasi"
+                                            style="font-size: 12pt" placeholder="Lokasi"
                                             value="{{ request('nama_lokasi') }}">
                                     </div>
                                     <div class="col-sm-2 mb-3 d-flex flex-column">
@@ -207,7 +205,7 @@
                                         <tr>
                                             <th class="text-center" style="color: #f96332"><a>No.</a></th>
                                             <th class="text-center" style="color: #f96332"><a>Lokasi</a></th>
-                                            <th class="text-center" style="color: #f96332"><a>Wilayah</a></th>
+                                            {{-- <th class="text-center" style="color: #f96332"><a>Wilayah</a></th> --}}
                                             <th class="text-center" style="color: #f96332"><a>Koordinat</a></th>
                                             @foreach ($columns as $column)
                                                 <th class="text-center">
@@ -229,7 +227,7 @@
                                                     {{ $loop->iteration + ($uji_air_eksternals->currentPage() - 1) * $uji_air_eksternals->perPage() }}
                                                 </td>
                                                 <td class="text-center">{{ $air_eksternal['nama_lokasi'] }}</td>
-                                                <td class="text-center">{{ $air_eksternal['wilayah_lokasi'] }}</td>
+                                                {{-- <td class="text-center">{{ $air_eksternal['wilayah_lokasi'] }}</td> --}}
                                                 <td class="text-center">
                                                     {{ substr($air_eksternal->longitude . ', ' . $air_eksternal->latitude, 0, 15) }}...
                                                 </td>
@@ -413,7 +411,7 @@
                 <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLongTitle">Import File</h5>
+                            <h5 class="modal-title" id="exampleModalLongTitle">Upload File</h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -433,7 +431,7 @@
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
 
-                            <button type="submit" class="btn btn-primary">Import</button>
+                            <button type="submit" class="btn btn-primary">Upload</button>
                             {{-- <button type="button" class="btn btn-primary">Save changes</button> --}}
                         </div>
                     </div>

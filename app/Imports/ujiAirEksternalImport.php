@@ -14,7 +14,7 @@ class ujiAirEksternalImport implements ToModel, WithHeadingRow
         return new UjiAirEksternal([
             'tanggal' => $row['tanggal'],
             'nama_lokasi' => $row['nama_lokasi'],
-            'wilayah_lokasi' => $row['wilayah_lokasi'],
+            // 'wilayah_lokasi' => $row['wilayah_lokasi'],
             'longitude' => $row['longitude'] ?? null,
             'latitude' => $row['latitude'] ?? null,
             'temperature' => $row['temperature'] ?? null,

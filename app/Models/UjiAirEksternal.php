@@ -13,7 +13,7 @@ class UjiAirEksternal extends Model
     protected $fillable = [
         'tanggal',
         'nama_lokasi',
-        'wilayah_lokasi',
+        // 'wilayah_lokasi',
         'longitude',
         'latitude',
         'temperature',

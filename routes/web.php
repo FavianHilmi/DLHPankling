@@ -24,61 +24,62 @@ use Illuminate\Support\Facades\Storage;
 //     ->middleware(['auth', 'verified'])
 //     ->name('dashboard');
 
-Route::get('/', function () {
-    return redirect()->route('dashboard');
-});
-
-// Rute dengan middleware otentikasi dan verifikasi
-Route::get('/dashboard', [DashboardController::class, 'generateChart'])->middleware(['auth', 'verified'])->name('dashboard');
 
 
-Route::middleware(['auth', 'admin'])->group(function () {
-    Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
-    Route::post('/register', [RegisteredUserController::class, 'store']);
-});
+// Route::get('/register', [RegisteredUserController::class, 'create'])
+//     ->middleware('auth', 'can:isAdmin')
+//     ->name('register');
+// Route::get('/register', [RegisteredUserController::class, 'create'])->name('register.create');
+// Route::post('/register', [RegisteredUserController::class, 'store'])->name('register.store');
+// });
 
-Route::middleware('auth')->group(function () {
-
-    // Route::get('/register', [RegisteredUserController::class, 'create'])
-    //     ->middleware('auth', 'can:isAdmin')
-    //     ->name('register');
-    // Route::get('/register', [RegisteredUserController::class, 'create'])->name('register.create');
-    // Route::post('/register', [RegisteredUserController::class, 'store'])->name('register.store');
-    // });
-
-    // Route::get('/dashboard', [DashboardController::class, 'index'])->name('data_passive.index');
+// Route::get('/dashboard', [DashboardController::class, 'index'])->name('data_passive.index');
     // Route::get('/data_passive', [DataPassiveController::class, 'index'])->name('data_passive.index');
+
+    Route::middleware('auth')->group(function () {
+
+    Route::get('/', function () {
+        return redirect()->route('dashboard');
+    });
+
+    Route::get('/dashboard', [DashboardController::class, 'generateChart'])->middleware(['auth', 'verified'])->name('dashboard');
+    Route::post('/refresh-chart', [DashboardController::class, 'refreshChart'])->name('refresh.chart');
+    Route::middleware(['auth', 'admin'])->group(function () {
+        Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
+        Route::post('/register', [RegisteredUserController::class, 'store']);
+    });
+
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::get('/download-template/{filename}', function ($filename) {
-        $filePath = 'public/templates/' . $filename;
+    // Route::get('/download-template/{filename}', function ($filename) {
+    //     $filePath = 'public/templates/' . $filename;
 
-        if (Storage::exists($filePath)) {
-            return Storage::download($filePath);
-        } else {
-            abort(404, 'File not found.');
-        }
-    });
+    //     if (Storage::exists($filePath)) {
+    //         return Storage::download($filePath);
+    //     } else {
+    //         abort(404, 'File not found.');
+    //     }
+    // });
 
     Route::get('/generate-pdf/{id}', [GeneratePDFController::class, 'generatePDF'])->name('generatePDF.index');
+    Route::post('/refresh-chart', [GeneratePDFController::class, 'refreshChart'])->name('refresh.chart');
 
-    // Route::get('/generate-pdf/{id}', [GeneratePDFController::class, 'generatePDF']);
-    Route::get('/download-template/{type}', function ($type) {
-        $templates = [
-            'spkua' => 'app/templates/data_spkua_entry_form.xlsx',
-            'partikulat' => 'app/templates/data_partikulat_entry_form.xlsx',
-            'klhk' => 'app/templates/data_klhk_entry_form.xlsx',
-        ];
+    // Route::get('/download-template/{type}', function ($type) {
+    //     $templates = [
+    //         'spkua' => 'app/templates/data_spkua_entry_form.xlsx',
+    //         'partikulat' => 'app/templates/data_partikulat_entry_form.xlsx',
+    //         'klhk' => 'app/templates/data_klhk_entry_form.xlsx',
+    //     ];
 
-        if (!array_key_exists($type, $templates)) {
-            abort(404, 'Template not found');
-        }
+    //     if (!array_key_exists($type, $templates)) {
+    //         abort(404, 'Template not found');
+    //     }
 
-        return Storage::download($templates[$type]);
-    })->name('download.template');
+    //     return Storage::download($templates[$type]);
+    // })->name('download.template');
 
     Route::get('/form_data_passive', [DataPassiveController::class, 'create'])->name('data_passive.create');
     Route::get('/data_passive', [DataPassiveController::class, 'index'])->name('data_passive.index');
@@ -109,12 +110,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/data_partikulat/{id}/edit', [DataPartikulatController::class, 'edit'])->name('data_partikulat.edit');
     Route::patch('/data_partikulat/{id}', [DataPartikulatController::class, 'update'])->name('data_partikulat.update');
     Route::delete('/data_partikulat/{id}', [DataPartikulatController::class, 'destroy'])->name('data_partikulat.destroy');
-    // Route::post('/data-partikulat/{id}/verify', [DataPartikulatController::class, 'verify'])->name('data_partikulat.verify');
     Route::post('/data_partikulat/{id}/approve', [DataPartikulatController::class, 'approve'])->name('data_partikulat.approve');
     Route::post('/data_partikulat/{id}/revisi', [DataPartikulatController::class, 'revisi'])->name('data_partikulat.revisi');
     Route::get('/data_partikulat/import', [DataPartikulatController::class, 'showImportForm'])->name('data_partikulat.importForm');
     Route::post('/data_partikulat/import/file', [DataPartikulatController::class, 'import'])->name('data_partikulat.import');
-    Route::get('/download-partikulat', DataPartikulatController::class);
+    // Route::get('/download-partikulat', DataPartikulatController::class);
 
     Route::get('/form_arsip_uji_air', [ArsipUjiAirController::class, 'create'])->name('arsip_uji_air.create');
     Route::post('/arsip_uji_air', [ArsipUjiAirController::class, 'store'])->name('arsip_uji_air.store');
@@ -161,6 +161,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/uji_air_internal/{id}/revisi', [UjiAirInternalController::class, 'revisi'])->name('uji_air_internal.revisi');
     Route::get('/uji_air_internal/import', [UjiAirInternalController::class, 'showImportForm'])->name('uji_air_internal.importForm');
     Route::post('/uji_air_internal/import/file', [UjiAirInternalController::class, 'import'])->name('uji_air_internal.import');
+    // Route::get('/download-template1', [UjiAirInternalController::class, 'downloadTemplate'])->name('uji_air_internal.downloadTemplate');
+
 
     Route::get('/uji_air_eksternal', [UjiAirEksternalController::class, 'index'])->name('uji_air_eksternal.index');
     Route::get('/form_uji_air_eksternal', [UjiAirEksternalController::class, 'create'])->name('uji_air_eksternal.create');
@@ -185,20 +187,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/berita_acara/download', [DataBeritaAcaraController::class, 'download'])->name('berita_acara.download');
 
 
-    // Route::middleware(['auth'])->group(function () {
     Route::get('/data_user', [DataPenggunaController::class, 'index'])->name('data_user.index');
     Route::get('/data_user/{id}/edit', [DataPenggunaController::class, 'edit'])->name('data_user.edit');
     Route::put('/data_user/{id}', [DataPenggunaController::class, 'update'])->name('data_user.update');
     Route::delete('/data_user/{id}', [DataPenggunaController::class, 'destroy'])->name('data_user.destroy');
-    // });
 
 
 
     Route::get('/maps', [MapsController::class, 'index'])->name('maps.index');
-
-    // Route::get('/maps', function () {
-    //     return view('maps');
-    // });
 
     Route::get('/data_kawasan', function () {
         return view('data_kawasan');

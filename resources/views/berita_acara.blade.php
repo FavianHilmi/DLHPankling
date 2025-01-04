@@ -57,7 +57,7 @@
                     <div class="card">
                         <div class="card-header">
                             <h4 class="card-title">Data Berita Acara</h4>
-                            <button class="button-add" onclick="window.location.href='/form_berita_acara';">
+                            <button class="button-add" onclick="window.location.href='/form_berita_acara';" data-bs-toggle="tooltip" title="Form Tambah Data">
                                 <i class="bi bi-file-earmark-plus"></i>
                                 {{-- <i class="now-ui-icons ui-1_simple-add" style="color: white; font-weight:bold;"></i> --}}
                                 {{-- <span class="lable">Buat Berita Acara</span> --}}

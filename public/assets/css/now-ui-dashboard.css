@@ -4836,7 +4836,7 @@ form label {
 }
 
 .card .card-header, .card-header-form{
-    padding: 45px 15px 55px 15px;
+    padding: 45px 15px 78px 15px;
     border: 0;
 }
 
@@ -4980,12 +4980,26 @@ align-items: center;
 }
 
 .card-chart .chart-area {
-    height: 190px;
+    height: auto;
+    /* height: 190px; */
     width: calc(100% + 30px);
     margin-left: -15px;
     margin-right: -15px;
 }
+.card-body {
+    overflow: hidden; /* Kontrol overflow konten di dalam body card */
+}
 
+.chart-area {
+    max-width: 100%; /* Pastikan gambar atau konten tidak melebihi lebar card */
+    overflow: hidden;
+    text-align: center; /* Pusatkan konten jika perlu */
+}
+
+.chart-img {
+    max-width: 100%; /* Hindari gambar melebihi area */
+    height: auto; /* Pertahankan rasio aspek gambar */
+}
 .card-chart .card-footer {
     margin-top: 15px;
 }
@@ -6600,6 +6614,13 @@ align-items: center;
 .linechart-img
 {
     max-width: 100%; /* Membuat gambar responsif */
+    height: auto; /* Menjaga rasio aspek gambar */
+    margin-bottom: 20px; /* Jarak bawah yang lebih natural */
+    display: inline-block; /* Memastikan gambar tidak meregang */
+}
+.piechart-wono-kebon-img
+{
+    max-width: 80%; /* Membuat gambar responsif */
     height: auto; /* Menjaga rasio aspek gambar */
     margin-bottom: 20px; /* Jarak bawah yang lebih natural */
     display: inline-block; /* Memastikan gambar tidak meregang */

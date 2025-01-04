@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\UjiAirInternalRequest;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use Illuminate\Support\Facades\Storage;
 
 class UjiAirInternalController extends Controller
 {
@@ -169,7 +170,7 @@ class UjiAirInternalController extends Controller
             $data[] = [
                 'tanggal' => $formattedTanggal,
                 'nama_lokasi' => $row[1],
-                'wilayah_lokasi' => $row[2],
+                // 'wilayah_lokasi' => $row[2],
                 'longitude' => $row[3],
                 'latitude' => $row[4],
                 'pH' => $row[5],
@@ -194,9 +195,19 @@ class UjiAirInternalController extends Controller
         }
 
         if (!empty($errors)) {
-            return back()->with('error', 'Beberapa baris gagal diimpor: ' . implode(', ', $errors));
+            return back()->with('error', 'Beberapa baris gagal diunggah: ' . implode(', ', $errors));
         }
 
-        return redirect()->route('uji_air_internal.index')->with('success', 'Data berhasil diimpor!');
+        return redirect()->route('uji_air_internal.index')->with('success', 'Data berhasil diunggah!');
+    }
+
+    public function downloadTemplate()
+    {
+        $filePath = 'templates/data_air_internal_entry_form.xlsx';
+        if (Storage::exists($filePath)) {
+            return response()->download(storage_path('app/' . $filePath), 'data_air_internal_entry_form.xlsx');
+        }
+
+        return redirect()->back()->with('error', 'File tidak ditemukan.');
     }
 }

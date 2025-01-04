@@ -25,6 +25,7 @@ return new class extends Migration
             $table->float('HC');
             $table->float('PM10');
             $table->float('PM2_5');
+            $table->string('kategori')->nullable();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->enum('status', ['Sedang Diajukan','Terverifikasi','Perlu Revisi'])->default('Sedang Diajukan');
         });

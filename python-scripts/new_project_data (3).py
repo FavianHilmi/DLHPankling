@@ -29,7 +29,7 @@ from sklearn.metrics import classification_report, accuracy_score
 ### **Konversi Data menjadi ISPU**
 """
 
-url='https://drive.google.com/file/d/1LGQ3K9CKr3iBPe5jYM7Gc7ia0Z_innCk/view?usp=sharing'
+url='https://drive.google.com/file/d/1zJVlItGdBGVo5x4jdee2xZsz1jldftiM/view?usp=sharing'
 url='https://drive.google.com/uc?id=' + url.split('/')[-2]
 df1 = pd.read_csv(url)
 
@@ -237,7 +237,7 @@ df_tandes_combine
 
 """## **Proses Prediksi 30 hari kedepan dengan menggabungkan 2 data sebelumnya**"""
 
-df_tandes.tail()
+df_tandes_combine.tail()
 
 # Filter data untuk lokasi Tandes
 df_tandes = df_tandes_combine[df_tandes_combine['Lokasi'] == 'Tandes']
@@ -247,7 +247,6 @@ df_tandes['Tanggal'] = pd.to_datetime(df_tandes['Tanggal'], format='%d-%b-%y', e
 
 # Periksa dan hapus nilai dengan tanggal tidak valid
 if df_tandes['Tanggal'].isnull().any():
-    print("Menghapus baris dengan tanggal tidak valid...")
     df_tandes = df_tandes.dropna(subset=['Tanggal'])
 
 # Hapus kolom yang tidak diperlukan pada data latih
@@ -424,7 +423,7 @@ plt.show()
 
 """# **Insight dan rekomendasi Kebijakan pada Data AIR**"""
 
-url='https://drive.google.com/file/d/1EFeV1sQ0ZWDYLfzcejBUrmIxSiD0Rm8Y/view?usp=sharing'
+url='https://drive.google.com/file/d/1UD-_vQOKjk6FjsdJoYVL-pNgovV3nO_L/view?usp=sharing'
 url='https://drive.google.com/uc?id=' + url.split('/')[-2]
 df2 = pd.read_csv(url)
 
@@ -432,8 +431,14 @@ df2.head()
 
 """### **Proses Perhitungan Baku Mutu**"""
 
+df2.info()
+
 # Hapus kolom yang tidak berguna
 df2 = df2.drop(columns=['Kordinat'], errors='ignore')
+
+# Tambahkan kolom Tahun dan Bulan dari kolom Tanggal
+df2['Tahun'] = pd.to_datetime(df2['Tanggal']).dt.year
+df2['Bulan'] = pd.to_datetime(df2['Tanggal']).dt.month
 
 # Parameter baku mutu Air Badan Air berdasarkan kelas
 baku_mutu = {
@@ -464,17 +469,13 @@ df2['Kualitas_Air'] = df2.apply(evaluate_quality, axis=1)
 df2.columns = df2.columns.str.strip()
 
 # Hitung jumlah untuk kategori 'Baik' dan 'Berbahaya' berdasarkan bulan dan tahun
-df2['Tahun'] = pd.to_datetime(df2['Tahun'], format='%Y').dt.year
-df2['Bulan'] = df2['Bulan'].astype(str)  # Pastikan bulan dalam format string
-
-# Hitung jumlah untuk masing-masing tahun
 jumlah_2023 = df2[df2['Tahun'] == 2023].groupby('Bulan')['Kualitas_Air'].value_counts().unstack(fill_value=0)
 jumlah_2024 = df2[df2['Tahun'] == 2024].groupby('Bulan')['Kualitas_Air'].value_counts().unstack(fill_value=0)
 
 """### **Line chart air 2023 dan 2024**"""
 
 # Pastikan 'Bulan' adalah integer untuk sorting
-df2['Bulan'] = df2['Bulan'].astype(int)
+df2['Bulan'] = pd.to_datetime(df2['Tanggal']).dt.month.astype(int)
 
 # Hitung jumlah untuk masing-masing tahun dan urutkan berdasarkan Bulan
 jumlah_2023 = df2[df2['Tahun'] == 2023].groupby('Bulan')['Kualitas_Air'].value_counts().unstack(fill_value=0).sort_index()
@@ -615,15 +616,59 @@ print("\n".join(solusi_output))
 
 """# **Prediksi dan Insight pada data Udara DLH kebonsari dan Wonorejo**"""
 
-# Mengambil data dari data ISPU
-df3 = df
+url='https://drive.google.com/file/d/1dy5sq46ELXtIppaVc6qQrKPHvhpc-hbO/view?usp=sharing'
+url='https://drive.google.com/uc?id=' + url.split('/')[-2]
+data = pd.read_csv(url)
 
 """### **Preprocessing data**"""
 
-df3.head()
+# Tabel baku mutu ISPU
+baku_mutu = {
+    "PM10": [(0, 50, 50), (50, 150, 100), (150, 350, 200), (350, 420, 300), (420, 500, 400)],
+    "PM2.5": [(0, 15.5, 50), (15.5, 55.4, 100), (55.4, 150.4, 200), (150.4, 250.4, 300), (250.4, float('inf'), 400)],
+    "SO2": [(0, 52, 50), (52, 180, 100), (180, 400, 200), (400, 800, 300), (800, 1200, 400)],
+    "CO": [(0, 4000, 50), (4000, 8000, 100), (8000, 15000, 200), (15000, 30000, 300), (30000, 45000, 400)],
+    "O3": [(0, 120, 50), (120, 235, 100), (235, 400, 200), (400, 800, 300), (800, 1000, 400)],
+    "NO2": [(0, 80, 50), (80, 200, 100), (200, 400, 200), (400, 800, 300), (800, 1000, 400)],
+    "HC": [(0, 45, 50), (45, 100, 100), (100, 215, 200), (215, 432, 300), (432, 648, 400)]
+}
 
-# Menampilkan semua nilai unik di kolom 'Lokasi'
-print(df3['Lokasi'].unique())
+def calculate_ispu(value, pollutant):
+    for lower_bound, upper_bound, ispu_value in baku_mutu[pollutant]:
+        if lower_bound <= value < upper_bound:
+            xx = value
+            ia = ispu_value
+            ib = ispu_value - 50  # ISPU untuk batas bawah
+            xa = upper_bound
+            xb = lower_bound
+
+            ispu = (ia - ib) / (xa - xb) * (xx - xb) + ib
+            return round(ispu, 1)
+    return None
+
+# Menggunakan DataFrame "data" yang sudah ada
+df3 = pd.DataFrame()
+
+# Menambahkan kolom Lokasi dan Tanggal dari "data"
+df3['Lokasi'] = data['Lokasi']
+df3['X'] = data['X']
+df3['Y'] = data['Y']
+df3['Tanggal'] = data['Tanggal']
+
+# Mengisi nilai kosong dengan nilai 0
+data = data.fillna(0)
+
+# Menghitung ISPU dan menambahkannya ke df3
+df3['PM10'] = data['PM10'].apply(lambda x: calculate_ispu(x, 'PM10'))
+df3['PM2.5'] = data['PM2.5'].apply(lambda x: calculate_ispu(x, 'PM2.5'))
+df3['SO2'] = data['SO2'].apply(lambda x: calculate_ispu(x, 'SO2'))
+df3['CO'] = data['CO'].apply(lambda x: calculate_ispu(x, 'CO'))
+df3['O3'] = data['O3'].apply(lambda x: calculate_ispu(x, 'O3'))
+df3['NO2'] = data['NO2'].apply(lambda x: calculate_ispu(x, 'NO2'))
+df3['HC'] = data['HC'].apply(lambda x: calculate_ispu(x, 'HC'))
+
+# Menampilkan DataFrame df3
+df3
 
 # Filter data untuk lokasi 'Wonorejo' dan 'Kebonsari'
 df3_filtered = df3[df3['Lokasi'].isin(['Wonorejo', 'Kebonsari'])]
@@ -634,11 +679,6 @@ df3_filtered = df3_filtered.drop(columns=['PM2.5', 'CO', 'HC', 'X', 'Y'], errors
 # Menampilkan hasil akhir
 print("Data setelah filtrasi untuk 'Wonorejo' dan 'Kebonsari':")
 df3_filtered
-
-# Menampilkan semua nilai unik di kolom 'Lokasi'
-print(df3_filtered['Lokasi'].unique())
-
-df3_filtered.tail()
 
 """### **Menambahkan kolom Kategori**"""
 
@@ -663,7 +703,7 @@ df3_filtered['Kategori'] = df3_filtered.apply(classify_category, axis=1)
 df3_kategori = df3_filtered.copy()
 
 # Tampilkan hasil DataFrame baru
-df3_kategori.tail()
+df3_kategori.head()
 
 """## **Prediksi udara Kebonsari dan Wonorejo**"""
 
@@ -815,11 +855,12 @@ df_predicted_Kebonsari.head()
 print("Classification Report untuk Wonorejo:")
 print(classification_report(y_test, knn.predict(X_test), zero_division=0))
 
+
 # Tampilkan classification report untuk Kebonsari
 print("\nClassification Report untuk Kebonsari:")
 print(classification_report(y_test, knn.predict(X_test), zero_division=0))
 
-"""### **Visualisasi Line chart Data Wonorejo**"""
+"""### **Visualisasi Line chart Prediksi udara Wonorejo**"""
 
 # Mengatur ukuran grafik
 plt.figure(figsize=(12, 6))
@@ -844,7 +885,7 @@ plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
 # Menampilkan grafik
 plt.show()
 
-"""### **Visualisasi Line Chart Kebonsari**"""
+"""### **Visualisasi Line Chart Prediksi Udara Kebonsari**"""
 
 # Mengatur ukuran grafik
 plt.figure(figsize=(12, 6))
@@ -905,7 +946,7 @@ axs[1].legend(labels, title='Polutan', loc='lower right', bbox_to_anchor=(1, 0),
 plt.tight_layout()
 plt.show()
 
-"""## **Data udara 2019 - 2024**"""
+"""## **Insight Data udara 2019 - 2024**"""
 
 # Mengubah kolom 'Tanggal' menjadi datetime
 df3_filtered['Tanggal'] = pd.to_datetime(df3_filtered['Tanggal'], errors='coerce')
@@ -1055,3 +1096,4 @@ plt.grid()
 plt.legend(loc='upper right', bbox_to_anchor=(1.15, 1))
 plt.tight_layout()
 plt.show()
+

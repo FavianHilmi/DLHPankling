@@ -14,7 +14,7 @@ class ujiAirInternalImport implements ToModel, WithHeadingRow
         return new UjiAirInternal([
             'tanggal' => $row['tanggal'],
             'nama_lokasi' => $row['nama_lokasi'],
-            'wilayah_lokasi' => $row['wilayah_lokasi'],
+            // 'wilayah_lokasi' => $row['wilayah_lokasi'],
             'longitude' => $row['longitude'],
             'latitude' => $row['latitude'],
             'pH' => $row['pH'],
